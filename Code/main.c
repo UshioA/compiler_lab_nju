@@ -1,6 +1,8 @@
-#include <stdio.h>
-#include "syntax.tab.h"
 #include "ast.h"
+#include "syntax.tab.h"
+#include <stdio.h>
+void yyrestart(FILE *);
+extern int parerr;
 int main(int argc, char **argv) {
   if (argc <= 1)
     return 1;
@@ -10,7 +12,8 @@ int main(int argc, char **argv) {
     return 1;
   }
   yyrestart(f);
-  yyparse();
-  print_ast(ast_root);
+  if (!yyparse(ast_root))
+    if(!parerr)
+      print_ast(ast_root);
   return 0;
 }

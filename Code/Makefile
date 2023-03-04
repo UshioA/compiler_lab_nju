@@ -17,6 +17,9 @@ YFC = $(shell find ./ -name "*.y" | sed s/[^/]*\\.y/syntax.tab.c/)
 LFO = $(LFC:.c=.o)
 YFO = $(YFC:.c=.o)
 
+produce: parser
+	cp parser ..
+
 parser: syntax $(filter-out $(LFO),$(OBJS))
 	$(CC) -o parser $(filter-out $(LFO),$(OBJS)) -lfl -ly
 
@@ -32,7 +35,7 @@ syntax-c: $(YFILE)
 -include $(patsubst %.o, %.d, $(OBJS))
 
 # 定义的一些伪目标
-.PHONY: clean test
+.PHONY: clean test pack produce clean-pack
 test:
 	./parser ../Test/test1.cmm
 clean:
@@ -40,3 +43,10 @@ clean:
 	rm -f $(OBJS) $(OBJS:.o=.d)
 	rm -f $(LFC) $(YFC) $(YFC:.c=.h)
 	rm -f *~
+	rm -f ../parser
+
+pack: clean
+	cd ~/Lab && zip -r 201220195.zip Code report.pdf parser
+
+clean-pack:
+	rm -rf ../201220195.zip

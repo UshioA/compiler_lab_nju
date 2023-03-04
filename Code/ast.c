@@ -62,11 +62,14 @@ ast_node *get_child_n(ast_node *fa, int n) {
   return chn;
 }
 
-ast_node *get_child_last(ast_node *fa) { return get_child_n(fa, fa->childnum-1); }
+ast_node *get_child_last(ast_node *fa) {
+  return get_child_n(fa, fa->childnum - 1);
+}
 
 void add_ast_child(ast_node *fa, ast_node *c) {
   if (c) {
-    // printf("add node %s to %s\n", get_symbol_name(c->symbol), get_symbol_name(fa->symbol));
+    // printf("add node %s to %s\n", get_symbol_name(c->symbol),
+    // get_symbol_name(fa->symbol));
     ast_node *lc = get_child_last(fa);
     if (!lc) {
       fa->child = c;
@@ -121,7 +124,8 @@ void __print_ast(ast_node *root, int space) {
     printf(": %f", root->value.float_val);
   } break;
   case STR_TYPE: {
-    printf(": %s", root->value.str_val);
+    if (root->symbol != RELOP)
+      printf(": %s", root->value.str_val);
   } break;
   case NONE_TYPE: {
   } break;
