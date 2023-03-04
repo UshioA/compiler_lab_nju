@@ -1,0 +1,16 @@
+struct a{
+  int a;
+  float b;
+  int c;
+};
+
+struct double a;
+
+int main(int a, int b){
+  int a;
+  int b;
+  c;
+  a = 1+-2;
+  main();
+  b = 2;
+}

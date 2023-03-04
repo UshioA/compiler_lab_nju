@@ -1,4 +1,9 @@
 *.o
+*.out
 *.output
+*.zip
+*.pdf
+test*/
+*.py
 parser
 .vscode/
