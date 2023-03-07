@@ -43,10 +43,12 @@ clean:
 	rm -f $(OBJS) $(OBJS:.o=.d)
 	rm -f $(LFC) $(YFC) $(YFC:.c=.h)
 	rm -f *~
+
+clean-all: clean
 	rm -f ../parser
 
-pack: clean
-	cd ~/Lab && zip -r 201220195.zip Code report.pdf parser
+pack:produce clean
+	cd ~/Lab && zip -r 201220195.zip Code Test README parser report.pdf
 
 clean-pack:
 	rm -rf ../201220195.zip

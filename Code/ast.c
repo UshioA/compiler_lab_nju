@@ -41,7 +41,7 @@ ast_node *make_ast_node(int sy, int isterminal, ast_value value) {
 
 ast_node *make_ast_nonterm(int sy) {
   // printf("build nonterm %s\n", get_symbol_name(sy));
-  return make_ast_node(sy, 0, (ast_value)-1);
+  return make_ast_node(sy, 0, (ast_value)(0xffffffff));
 }
 
 ast_node *make_ast_term(int sy, ast_value v) {
@@ -118,7 +118,7 @@ void __print_ast(ast_node *root, int space) {
   printf("%s", get_symbol_name(root->symbol));
   switch (get_symbol_type(root->symbol)) {
   case INT_TYPE: {
-    printf(": %d", root->value.int_val);
+    printf(": %u", root->value.int_val);
   } break;
   case FLOAT_TYPE: {
     printf(": %f", root->value.float_val);

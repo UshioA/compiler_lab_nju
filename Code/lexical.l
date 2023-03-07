@@ -32,7 +32,7 @@ int parerr=0;
 #define MAKE_INODE(n) \
   ast_value av;\
   if(n==INT)\
-    av.int_val = strtol(yytext, NULL, 0);\
+    av.int_val = strtoul(yytext, NULL, 0);\
   else\
     av.float_val = atof(yytext);\
   yylval = make_ast_term(n, av);\

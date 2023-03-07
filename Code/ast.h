@@ -1,6 +1,7 @@
 #ifndef __CMM_AST_H__
 #define __CMM_AST_H__
 #include "common.h"
+#include <stdint.h>
 typedef enum value_type { NONE_TYPE, INT_TYPE, FLOAT_TYPE, STR_TYPE } value_type;
 extern int yylineno;
 extern int yyleng;
@@ -29,7 +30,7 @@ typedef enum nonterminal_type {
 } nonterminal_type;
 
 typedef union ast_value {
-  int int_val;
+  uint32_t int_val;
   float float_val;
   char *str_val; // actually it's identifier but haha.
 } ast_value;
