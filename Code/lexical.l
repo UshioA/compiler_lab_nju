@@ -25,7 +25,7 @@ int parerr=0;
 
 #define LEXERR() \
   do{\
-    fprintf(stderr, "Error type A at Line %d: Mysterious character %s\n", yylineno, yytext);\
+    fprintf(stdout, "Error type A at Line %d: Mysterious character %s\n", yylineno, yytext);\
     lexerr=1;\
   }while(0)
 
@@ -111,5 +111,5 @@ oerr 0[0-7]*[8-9]+[0-9]*
 "\n" {yycolumn=1;}
 {whitespace}+ {;}
 <<EOF>> {MAKE_ENODE(EOF);}
-. {fprintf(stderr, "Error type A at Line %d: Mysterious character %s\n", yylineno, yytext);lexerr=1;}
+. {fprintf(stdout, "Error type A at Line %d: Mysterious character %s\n", yylineno, yytext);lexerr=1;}
 %%

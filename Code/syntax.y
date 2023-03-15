@@ -60,7 +60,8 @@ ExtDefList: ExtDef ExtDefList {
     add_ast_child($$, $1);
     add_ast_child($$, $2);
   }
-  | {$$ = NULL;} | error {ERR();$$=NULL;}
+  | {$$ = NULL;} 
+  | error {ERR();$$=NULL;}
 ExtDef: Specifier ExtDecList SEMI {
     $$ = make_ast_nonterm(ExtDef);
     add_ast_child($$, $1);
@@ -97,7 +98,8 @@ Specifier: TYPE {
   | StrtuctSpecifier {
     $$ = make_ast_nonterm(Specifier);
     add_ast_child($$, $1);
-  }| error {ERR();$$=NULL;}
+  }
+  | error {ERR();$$=NULL;}
 StrtuctSpecifier: STRUCT OptTag LC DefList RC {
                     $$ = make_ast_nonterm(StructSpecifier);
                     add_ast_child($$, $1);
@@ -110,7 +112,8 @@ StrtuctSpecifier: STRUCT OptTag LC DefList RC {
                     $$ = make_ast_nonterm(StructSpecifier);
                     add_ast_child($$, $1);
                     add_ast_child($$, $2);
-                  }| error {ERR();$$=NULL;}
+                  }
+                  | error {ERR();$$=NULL;}
 OptTag: ID {
   $$ = make_ast_nonterm(OptTag);
   add_ast_child($$, $1);
@@ -172,7 +175,8 @@ StmtList: Stmt StmtList {
           $$ = make_ast_nonterm(StmtList);
           add_ast_child($$, $1);
           add_ast_child($$, $2);
-        } | {$$=NULL;}| error {ERR();$$=NULL;}
+        } | {$$=NULL;}
+        | error {ERR();$$=NULL;}
 Stmt: Exp SEMI {
       $$ = make_ast_nonterm(Stmt);
       add_ast_child($$, $1);
@@ -214,10 +218,9 @@ Stmt: Exp SEMI {
       add_ast_child($$, $4);
       add_ast_child($$, $5);
     }
-    | error {ERR();$$=NULL;}
-    /* | error SERR();EMI{
-      ERR("sth error but idk fool");
-    } */
+    | error {$$=NULL;}
+    /* | error SEMI {$$=NULL;} */
+    /* | error RB {$$=NULL;} */
 /* Local Definitions */
 DefList: Def DefList {
       $$ = make_ast_nonterm(DefList);
@@ -248,7 +251,8 @@ Dec: VarDec {
       add_ast_child($$, $1);
       add_ast_child($$, $2);
       add_ast_child($$, $3);
-    }| error {ERR();$$=NULL;}
+    }
+    | error {ERR();$$=NULL;}
 /* Expressions */
 Exp:
     Exp ASSIGNOP Exp {
@@ -377,15 +381,16 @@ Args: Exp COMMA Args {
     }| Exp {
       $$ = make_ast_nonterm(Args);
       add_ast_child($$, $1);
-    }| error {ERR();$$=NULL;}
+    }
+    | error {ERR();$$=NULL;}
 %%
 
 void yyerror(ast_node* para, char* fmt, ...){
   va_list ap;
   va_start(ap, fmt);
-  fprintf(stderr, "Error type B at Line %d: ", para? para->lineno : yylineno);
-  vfprintf(stderr, fmt, ap);
-  fprintf(stderr, "\n");
+  fprintf(stdout, "Error type B at Line %d: ", para? para->lineno : yylineno);
+  vfprintf(stdout, fmt, ap);
+  fprintf(stdout, "\n");
   va_end(ap);
   parerr = 1;
 }
