@@ -8,5 +8,6 @@
 #include <stddef.h>
 #include <stdarg.h>
 #include <limits.h>
+#include <assert.h>
 
 #endif

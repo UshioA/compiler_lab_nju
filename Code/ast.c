@@ -109,7 +109,7 @@ int get_symbol_type(int sy) {
 
 void print_ast(ast_node *root) { __print_ast(root, 0); }
 
-void __print_ast(ast_node *root, int space) {
+static void __print_ast(ast_node *root, int space) {
   if (!root)
     return;
   for (int i = 0; i < space; ++i) {
