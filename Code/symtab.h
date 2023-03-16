@@ -3,7 +3,7 @@
 #include "common.h"
 #include "list.h"
 #include "type.h"
-#include <cstdint>
+#include <stdint.h>
 
 #define __CMM_HASH_SIZE__ 0xffff
 
@@ -13,12 +13,14 @@ typedef struct symbol { // variable, function, array, struct
   union {
     int ival;       // int type
     float fval;     // float type
-    int *dimension; // use dimension[0] as len.
+    uint32_t *dimension; // use dimension[0] as len.
   };
 } symbol;
 
 static inline uint32_t __fnv_hash(char *str, uint32_t length) {
-  const uint32_t fnv_prime = 0x811C9DC5;
+  const uint32_t fnv_prime =
+      0x811C9DC5; // 32 bit should be ok, assuming friendly user wont variables
+                  // with long names.
   uint32_t hash = 0;
   uint32_t i = 0;
 
@@ -37,7 +39,24 @@ typedef struct symtab_entry {
   symbol *symbol;
   list_entry link;
 } sentry;
+static symbol *make_symbol(cmm_type *ctype, char *name, int ival, float fval,
+                           uint32_t *dimension);
 
-// TODO: hash table.
+symbol *make_isymbol(char *name, uint32_t ival);
+symbol *make_fsymbol(char *name, float fval);
+symbol *make_asymbol(char *name, int basetype, uint32_t *dimension);
+symbol *make_ssymbol(char *name, cmm_type *ctype);
+symbol *make_funsymbol(char *name, cmm_type *ctype);
+int symbol_isbtype(symbol *s);
+sentry *make_sentry(symbol *);
+
+typedef struct symtab {
+  sentry **head;
+} symtab;
+
+symbol *symget(symtab *stab, char *name);
+void symset(symtab *stab, char *name, symbol *sym);
+
+symtab *make_symtab();
 
 #endif
