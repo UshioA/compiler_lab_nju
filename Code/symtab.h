@@ -5,14 +5,16 @@
 #include "type.h"
 #include <stdint.h>
 
-#define __CMM_HASH_SIZE__ 0xffff
+#define __CMM_HASH_SIZE_LARGE__ 0xffff
+#define __CMM_HASH_SIZE_NORMAL__ 0xfff
+#define __CMM_HASH_SIZE_SMALL__ 0x3ff
 
 typedef struct symbol { // variable, function, array, struct
   cmm_type *type;
   char *name;
   union {
-    int ival;       // int type
-    float fval;     // float type
+    int ival;            // int type
+    float fval;          // float type
     uint32_t *dimension; // use dimension[0] as len.
   };
 } symbol;
@@ -31,8 +33,8 @@ static inline uint32_t __fnv_hash(char *str, uint32_t length) {
   return hash;
 }
 
-static inline uint32_t hash(char *str, uint32_t len) {
-  return __fnv_hash(str, len) % __CMM_HASH_SIZE__;
+static inline uint32_t hash(char *str, uint32_t len, uint32_t size) {
+  return __fnv_hash(str, len) % size;
 }
 
 typedef struct symtab_entry {
@@ -52,11 +54,14 @@ sentry *make_sentry(symbol *);
 
 typedef struct symtab {
   sentry **head;
+  uint32_t hsize;
 } symtab;
 
 symbol *symget(symtab *stab, char *name);
 void symset(symtab *stab, char *name, symbol *sym);
 
-symtab *make_symtab();
-
+symtab *make_symtab(uint32_t hsize);
+symtab *make_symtabl();
+symtab *make_symtabn();
+symtab *make_symtabs();
 #endif

@@ -49,7 +49,7 @@ sentry *make_sentry(symbol *s) {
 }
 
 symbol *symget(symtab *stab, char *name) {
-  sentry *se = stab->head[hash(name, strlen(name))];
+  sentry *se = stab->head[hash(name, strlen(name), stab->hsize)];
   if (!se)
     return NULL;
   sentry *pos;
@@ -62,14 +62,14 @@ symbol *symget(symtab *stab, char *name) {
   return NULL;
 }
 void symset(symtab *stab, char *name, symbol *sym) {
-  uint32_t index = hash(name, strlen(name));
+  uint32_t index = hash(name, strlen(name), stab->hsize);
   sentry *se = stab->head[index];
   if (!list_empty(&se->link)) {
     sentry *pos;
     list_entry *head = &se->link;
     list_for_each_item(pos, head, link) {
       if (!strcmp(pos->symbol->name, name)) {
-        pos->symbol = sym; //! leak =(
+        pos->symbol = sym; //! leak =)
         return;
       }
     }
@@ -77,11 +77,16 @@ void symset(symtab *stab, char *name, symbol *sym) {
   list_add(&make_sentry(sym)->link, &se->link);
 }
 
-symtab *make_symtab() {
+symtab *make_symtab(uint32_t hsize) {
   symtab *stab = malloc(sizeof(symtab));
-  stab->head = malloc(sizeof(sentry) * __CMM_HASH_SIZE__);
-  for (int i = 0; i < __CMM_HASH_SIZE__; ++i) {
+  stab->hsize = hsize;
+  stab->head = malloc(sizeof(sentry) * hsize);
+  for (int i = 0; i < hsize; ++i) {
     stab->head[i] = make_sentry(NULL);
   }
   return stab;
 }
+
+symtab *make_symtabl() { return make_symtab(__CMM_HASH_SIZE_LARGE__); }
+symtab *make_symtabn() { return make_symtab(__CMM_HASH_SIZE_NORMAL__); }
+symtab *make_symtabs() { return make_symtab(__CMM_HASH_SIZE_SMALL__); }

@@ -4,7 +4,7 @@
 #include <math.h>
 
 int main(){
-  symtab* stab = make_symtab();
+  symtab* stab = make_symtabs();
   symbol* a1 = make_isymbol("a1", 1);
   symbol* a2 = make_fsymbol("a2", 1.2);
   symset(stab, a1->name, a1);
@@ -23,5 +23,4 @@ int main(){
   symset(stab, a1modify->name, a1modify);
   symbol* am1 = symget(stab, "a1");
   assert(am1 != aa1);
-  
 }
