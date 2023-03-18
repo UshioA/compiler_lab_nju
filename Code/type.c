@@ -31,7 +31,14 @@ static cmm_type *__new_cmm_type(int is_basetype, int ctype,
   list_init(&c->link);
   list_init(&c->contain_types);
   c->contain_len = -1;
+  c->errcode = NO_ERR;
   return c;
+}
+
+cmm_type *new_errtype(int errcode) {
+  cmm_type *err = malloc(sizeof(cmm_type));
+  err->errcode = errcode;
+  return err;
 }
 
 int cmm_compute_len(cmm_type *ptr) {

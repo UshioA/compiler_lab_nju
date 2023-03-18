@@ -22,7 +22,7 @@ typedef struct symbol { // variable, function, array, struct
 static inline uint32_t __fnv_hash(char *str, uint32_t length) {
   const uint32_t fnv_prime =
       0x811C9DC5; // 32 bit should be ok, assuming friendly user wont variables
-                  // with long names.
+                  // with a long name.
   uint32_t hash = 0;
   uint32_t i = 0;
 
@@ -39,14 +39,16 @@ static inline uint32_t hash(char *str, uint32_t len, uint32_t size) {
 
 typedef struct symtab_entry {
   symbol *symbol;
+  int isfield;
   list_entry link;
 } sentry;
-static symbol *make_symbol(cmm_type *ctype, char *name, int ival, float fval,
-                           uint32_t *dimension);
+static symbol *_make_symbol(cmm_type *ctype, char *name, int ival, float fval,
+                            uint32_t *dimension);
 
+symbol *make_symbol(char *name, cmm_type *ctype);
 symbol *make_isymbol(char *name, uint32_t ival);
 symbol *make_fsymbol(char *name, float fval);
-symbol *make_asymbol(char *name, int basetype, uint32_t *dimension);
+symbol *make_asymbol(char *name, cmm_type *basetype, uint32_t *dimension);
 symbol *make_ssymbol(char *name, cmm_type *ctype);
 symbol *make_funsymbol(char *name, cmm_type *ctype);
 int symbol_isbtype(symbol *s);

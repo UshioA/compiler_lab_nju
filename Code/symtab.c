@@ -2,10 +2,11 @@
 #include "list.h"
 #include "syntax.tab.h"
 #include "type.h"
+#include <assert.h>
 #include <stdint.h>
 
-static symbol *make_symbol(cmm_type *ctype, char *name, int ival, float fval,
-                           uint32_t *dimension) {
+static symbol *_make_symbol(cmm_type *ctype, char *name, int ival, float fval,
+                            uint32_t *dimension) {
   symbol *sym = malloc(sizeof(symbol));
   sym->name = name;
   sym->type = ctype;
@@ -22,21 +23,46 @@ static symbol *make_symbol(cmm_type *ctype, char *name, int ival, float fval,
   return sym;
 }
 
+// for first define some symbol, without value.
+symbol *make_symbol(char *name, cmm_type *ctype) {
+  if (ctype->errcode != NO_ERR)
+    return NULL;
+  if (ctype->is_basetype) {
+    switch (ctype->btype->dectype) {
+    case INT:
+      return make_isymbol(name, 0);
+    case FLOAT:
+      return make_fsymbol(name, 0.0);
+    case STRUCT:
+      return make_ssymbol(name, ctype);
+    default:
+      assert(0);
+    }
+  } else {
+    if (ctype->ctype == TYPE_FUNC) {
+      return make_funsymbol(name, ctype);
+    }
+    uint32_t *dimensions = malloc(sizeof(uint32_t) * (cmm_compute_len(ctype)));
+    return make_asymbol(name, ctype, dimensions);
+    //! need to complete dimensions by user.
+  }
+}
+
 symbol *make_isymbol(char *name, uint32_t ival) {
-  return make_symbol(new_cmm_btype(new_literal(INT)), name, ival, 0, NULL);
+  return _make_symbol(new_cmm_btype(new_literal(INT)), name, ival, 0, NULL);
 }
 symbol *make_fsymbol(char *name, float fval) {
-  return make_symbol(new_cmm_btype(new_literal(FLOAT)), name, 0, fval, NULL);
+  return _make_symbol(new_cmm_btype(new_literal(FLOAT)), name, 0, fval, NULL);
 }
-symbol *make_asymbol(char *name, int basetype, uint32_t *dimension) {
-  return make_symbol(new_cmm_ctype(TYPE_ARR, new_literal(basetype)), name, 0, 0,
-                     dimension);
+symbol *make_asymbol(char *name, cmm_type *basetype, uint32_t *dimension) {
+  return _make_symbol(new_cmm_ctype(TYPE_ARR, basetype->btype), name, 0, 0,
+                      dimension);
 }
 symbol *make_ssymbol(char *name, cmm_type *ctype) {
-  return make_symbol(ctype, name, 0, 0, 0);
+  return _make_symbol(ctype, name, 0, 0, 0);
 }
 symbol *make_funsymbol(char *name, cmm_type *ctype) {
-  return make_symbol(ctype, name, 0, 0, 0);
+  return _make_symbol(ctype, name, 0, 0, 0);
 }
 
 int symbol_isbtype(symbol *s) { return s->type->is_basetype; }
@@ -49,6 +75,8 @@ sentry *make_sentry(symbol *s) {
 }
 
 symbol *symget(symtab *stab, char *name) {
+  if (!name)
+    return NULL;
   sentry *se = stab->head[hash(name, strlen(name), stab->hsize)];
   if (!se)
     return NULL;

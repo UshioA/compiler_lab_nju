@@ -3,7 +3,6 @@
 #include "common.h"
 #include "list.h"
 #include "syntax.tab.h"
-#include <stdint.h>
 typedef struct base_type {
   int dectype;
   const char *struct_name; // if is struct.
@@ -17,13 +16,20 @@ typedef struct {
   };
   enum {
     TYPE_ARR,
-    TYPE_FUNC
+    TYPE_FUNC,
+    TYPE_ERR,
   } ctype; // indicates complex type. not sure if i should add `STRUCT' into
            // this.
+
+  enum {
+    NO_ERR,
+    ERR_UNDEFINE,
+    ERR_REDEFINE,
+  } errcode;
   list_entry link;
   union {
-    list_entry struct_fields; //struct
-    list_entry param_types;   //func
+    list_entry struct_fields; // struct
+    list_entry param_types;   // func
     list_entry contain_types; // summary dogshit.
   };
   int contain_len;
@@ -41,6 +47,8 @@ static cmm_type *__new_cmm_type(int is_basetype, int ctype,
 cmm_type *new_cmm_btype(base_type *btype);
 
 cmm_type *new_cmm_ctype(int ctype, base_type *return_type);
+
+cmm_type *new_errtype(int errcode);
 
 int cmm_compute_len(cmm_type *ptr);
 
