@@ -92,6 +92,8 @@ int btypecmp(base_type *b1, base_type *b2) {
  * @brief like strcmp, but compare cmm_type*
  */
 int ctypecmp(cmm_type *c1, cmm_type *c2) {
+  if (c1->errcode != NO_ERR || c2->errcode != NO_ERR)
+    return 0;
   if (c1->is_basetype && c2->is_basetype) {
     return btypecmp(c1->btype, c2->btype);
   }

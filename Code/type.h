@@ -25,6 +25,7 @@ typedef struct {
     NO_ERR,
     ERR_UNDEFINE,
     ERR_REDEFINE,
+    ERR_TYPEDISMATCH,
   } errcode;
   list_entry link;
   union {

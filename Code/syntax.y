@@ -255,6 +255,20 @@ Dec: VarDec {
     | error {ERR();$$=NULL;}
 /* Expressions */
 Exp:
+     ID LP Args RP {
+      $$ = make_ast_nonterm(Exp);
+      add_ast_child($$, $1);
+      add_ast_child($$, $2);
+      add_ast_child($$, $3);
+      add_ast_child($$, $4);
+    }|
+     Exp LB Exp RB {
+      $$ = make_ast_nonterm(Exp);
+      add_ast_child($$, $1);
+      add_ast_child($$, $2);
+      add_ast_child($$, $3);
+      add_ast_child($$, $4);
+    }|
     Exp ASSIGNOP Exp {
       $$ = make_ast_nonterm(Exp);
       add_ast_child($$, $1);
@@ -303,7 +317,19 @@ Exp:
       add_ast_child($$, $2);
       add_ast_child($$, $3);
     } |
+     ID LP RP {
+      $$ = make_ast_nonterm(Exp);
+      add_ast_child($$, $1);
+      add_ast_child($$, $2);
+      add_ast_child($$, $3);
+    } |
      LP Exp RP {
+      $$ = make_ast_nonterm(Exp);
+      add_ast_child($$, $1);
+      add_ast_child($$, $2);
+      add_ast_child($$, $3);
+    } |
+     Exp DOT ID {
       $$ = make_ast_nonterm(Exp);
       add_ast_child($$, $1);
       add_ast_child($$, $2);
@@ -319,32 +345,6 @@ Exp:
       add_ast_child($$, $1);
       add_ast_child($$, $2);
     }|
-     ID LP Args RP {
-      $$ = make_ast_nonterm(Exp);
-      add_ast_child($$, $1);
-      add_ast_child($$, $2);
-      add_ast_child($$, $3);
-      add_ast_child($$, $4);
-    }|
-     ID LP RP {
-      $$ = make_ast_nonterm(Exp);
-      add_ast_child($$, $1);
-      add_ast_child($$, $2);
-      add_ast_child($$, $3);
-    } |
-     Exp LB Exp RB {
-      $$ = make_ast_nonterm(Exp);
-      add_ast_child($$, $1);
-      add_ast_child($$, $2);
-      add_ast_child($$, $3);
-      add_ast_child($$, $4);
-    }|
-     Exp DOT ID {
-      $$ = make_ast_nonterm(Exp);
-      add_ast_child($$, $1);
-      add_ast_child($$, $2);
-      add_ast_child($$, $3);
-    } |
      ID {
       $$ = make_ast_nonterm(Exp);
       add_ast_child($$, $1);

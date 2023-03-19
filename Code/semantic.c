@@ -1,5 +1,7 @@
 #include "semantic.h"
 #include "ast.h"
+#include "frame.h"
+#include "list.h"
 #include "symtab.h"
 #include "syntax.tab.h"
 #include "type.h"
@@ -13,7 +15,7 @@ void do_semantic(ast_node *root) {
     program(root);
 }
 
-static void TODO(){
+static void TODO() {
   fprintf(stderr, "not implemented\n");
   assert(0);
 }
@@ -99,7 +101,7 @@ static char *vardec_ass(ast_node *root, uint32_t **shape, int *size,
   assert(0);
 }
 
-symbol* vardec(ast_node *root, cmm_type *type, int isfield) {
+symbol *vardec(ast_node *root, cmm_type *type, int isfield) {
   ast_node *ch1 = get_child_n(root, 0);
   int *size = malloc(sizeof(int));
   int *capacity = malloc(sizeof(int));
@@ -223,15 +225,89 @@ cmm_type *declist(ast_node *root, cmm_type *spec, int isfield) {
 void dec(ast_node *root, cmm_type *spec, int isfield) {
   ast_node *_vardec = get_child_n(root, 0);
   ast_node *_exp = get_child_n(root, 2);
-  symbol* sym = vardec(root, spec, isfield);
-  if(_exp){
-    cmm_type* exptype = exp(_exp);
+  symbol *sym = vardec(root, spec, isfield);
+  if (_exp) {
+    cmm_type *exptype = exp(_exp);
   }
 }
 
-cmm_type* exp(ast_node* root){
-  TODO();
-  return NULL; // TODO;
+cmm_type *exp(ast_node *root) { //屎
+  switch (root->childnum) {
+  case 1: { // ID INT FLOAT
+    ast_node *ch = get_child_last(root);
+    switch (ch->symbol) {
+    case ID: {
+      symbol *sym = frame_lookup(currf, ch->value.str_val);
+      if (!sym) {
+        error(1, ch->lineno);
+        return new_errtype(ERR_UNDEFINE);
+      }
+      return sym->type;
+    } break;
+    case INT:
+    case FLOAT: {
+      return new_cmm_btype(new_literal(ch->symbol));
+    } break;
+    default:
+      assert(0);
+    }
+  } break;
+  case 2: { // MINUS EXP | NOT EXP
+    ast_node *_exp = get_child_last(root);
+    cmm_type *etype = exp(_exp);
+    ast_node *op = get_child_n(root, 0);
+    if (op->symbol == NOT) {
+      if (!etype->is_basetype || etype->btype->dectype != FLOAT) {
+        error(7, _exp->lineno);
+        return new_errtype(ERR_TYPEDISMATCH);
+      }
+    } else if (op->symbol == MINUS) {
+      if (!etype->is_basetype || etype->btype->dectype == STRUCT) {
+        error(7, _exp->lineno);
+        return new_errtype(ERR_TYPEDISMATCH);
+      }
+    } else
+      assert(0);
+    return etype;
+  }
+  case 3: {
+    ast_node *head = get_child_n(root, 0);
+    switch (head->symbol) {
+    case ID: { // function call
+      symbol *sym = frame_lookup(currf, head->value.str_val);
+      if (!sym) {
+        error(2, head->lineno);
+        return new_errtype(ERR_UNDEFINE);
+      }
+      return sym->type;
+    } break;
+    case LP: { // bullshit =)
+      return exp(get_child_n(root, 1));
+    } break;
+    case Exp: {
+      ast_node *ch2 = get_child_n(root, 1);
+      switch (ch2->symbol) {
+      case DOT: {
+        cmm_type *h = exp(head);
+        if (!h->is_basetype || h->btype->dectype != STRUCT) {
+          error(13, head->lineno);
+          return new_errtype(ERR_TYPEDISMATCH);
+        }
+        ast_node *_id = get_child_last(root);
+        char *n = _id->value.str_val;
+        cmm_type *pos;
+        list_entry *head = &h->struct_fields; // super deceiving myself
+      } break;
+      }
+    }
+    }
+  } break;
+  case 4: {
+    assert(0);
+  } break;
+  default:
+    assert(0);
+  }
 }
 
 cmm_type *structspecifier(ast_node *root) {
