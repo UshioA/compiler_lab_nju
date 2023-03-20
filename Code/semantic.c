@@ -20,12 +20,12 @@ static void TODO() {
   assert(0);
 }
 
-void program(ast_node *root) {
+static void program(ast_node *root) {
   ast_node *_extdeflist = get_child_n(root, 0);
   extdeflist(_extdeflist);
 }
 
-void extdeflist(ast_node *root) {
+static void extdeflist(ast_node *root) {
   ast_node *_extdef = get_child_n(root, 0);
   ast_node *_extdeflist = get_child_n(root, 1);
   extdef(_extdef); // guaranteed by grammar.
@@ -34,7 +34,7 @@ void extdeflist(ast_node *root) {
   }
 }
 
-void extdef(ast_node *root) {
+static void extdef(ast_node *root) {
   ast_node *_specifier = get_child_n(root, 0);
   ast_node *ch2 = get_child_n(root, 1);
   ast_node *ch3 = get_child_n(root, 2);
@@ -61,7 +61,7 @@ void extdef(ast_node *root) {
   }
 }
 
-cmm_type *specifier(ast_node *root) {
+static cmm_type *specifier(ast_node *root) {
   ast_node *ch1 = get_child_n(root, 0);
   if (ch1->symbol == TYPE) {
     return new_cmm_btype(
@@ -71,7 +71,7 @@ cmm_type *specifier(ast_node *root) {
   }
 }
 
-void extdeclist(ast_node *root, cmm_type *spec) {
+static void extdeclist(ast_node *root, cmm_type *spec) {
   ast_node *_vardec = get_child_n(root, 0);
   ast_node *_extdeclist = get_child_n(root, 2);
   vardec(_vardec, spec, 0);
@@ -101,7 +101,7 @@ static char *vardec_ass(ast_node *root, uint32_t **shape, int *size,
   assert(0);
 }
 
-symbol *vardec(ast_node *root, cmm_type *type, int isfield) {
+static symbol *vardec(ast_node *root, cmm_type *type, int isfield) {
   ast_node *ch1 = get_child_n(root, 0);
   int *size = malloc(sizeof(int));
   int *capacity = malloc(sizeof(int));
@@ -110,7 +110,8 @@ symbol *vardec(ast_node *root, cmm_type *type, int isfield) {
   uint32_t *shape = malloc(sizeof(uint32_t) * (*capacity));
   memset(shape, 0, *capacity * sizeof(shape));
   char *name = vardec_ass(ch1, &shape, size, capacity);
-  symbol *sym = symget(currf->stab, name);
+  symbol *sym =
+      isfield ? symget(currf->sstab, name) : symget(currf->stab, name);
   if (sym) {
     error(type->btype->dectype == STRUCT ? 15 : 3, root->lineno);
   }
@@ -128,15 +129,16 @@ symbol *vardec(ast_node *root, cmm_type *type, int isfield) {
   } else {
     sym = make_symbol(
         name, type); // here type can only be btype, int, float, or struct.
-    if (isfield)
+    if (isfield) {   // ! TODO: check redefine
       frame_adds(currf, name, sym);
-    else
+    } else {
       frame_add(currf, name, sym);
+    }
   }
   return sym;
 }
 
-cmm_type *fundec(ast_node *root, cmm_type *rtype) {
+static cmm_type *fundec(ast_node *root, cmm_type *rtype) {
   ast_node *_id = get_child_n(root, 0);
   if (root->childnum == 4) {
     symbol *sym = symget(currf->stab, _id->value.str_val);
@@ -165,7 +167,7 @@ cmm_type *fundec(ast_node *root, cmm_type *rtype) {
   }
 }
 
-void varlist(ast_node *root, cmm_type *_v) {
+static void varlist(ast_node *root, cmm_type *_v) {
   ast_node *_paramdec = get_child_n(root, 0);
   ast_node *_varlist = get_child_n(root, 2);
   paramdec(_paramdec, _v);
@@ -174,7 +176,7 @@ void varlist(ast_node *root, cmm_type *_v) {
   }
 }
 
-void paramdec(ast_node *root, cmm_type *_v) {
+static void paramdec(ast_node *root, cmm_type *_v) {
   ast_node *_specifier = get_child_n(root, 0);
   ast_node *_vardec = get_child_n(root, 1);
   cmm_type *spec = specifier(_specifier);
@@ -182,14 +184,14 @@ void paramdec(ast_node *root, cmm_type *_v) {
   vardec(_vardec, spec, 0);
 }
 
-void compst(ast_node *root, cmm_type *rtype) {
+static void compst(ast_node *root, cmm_type *rtype) {
   ast_node *_deflist = get_child_n(root, 1);
   ast_node *_stmtlist = get_child_n(root, 2);
   deflist(_deflist, 0);
   stmtlist(_stmtlist);
 }
 
-cmm_type *deflist(ast_node *root, int isfield) {
+static cmm_type *deflist(ast_node *root, int isfield) {
   if (!root)
     return NULL;
   ast_node *_def = get_child_n(root, 0);
@@ -204,7 +206,7 @@ cmm_type *deflist(ast_node *root, int isfield) {
   return NULL;
 }
 
-cmm_type *def(ast_node *root, int isfield) {
+static cmm_type *def(ast_node *root, int isfield) {
   ast_node *_specifier = get_child_n(root, 0);
   ast_node *_declist = get_child_n(root, 1);
   cmm_type *spec = specifier(_specifier);
@@ -212,7 +214,7 @@ cmm_type *def(ast_node *root, int isfield) {
   return spec;
 }
 
-cmm_type *declist(ast_node *root, cmm_type *spec, int isfield) {
+static cmm_type *declist(ast_node *root, cmm_type *spec, int isfield) {
   ast_node *_dec = get_child_n(root, 0);
   ast_node *_declist = get_child_n(root, 2);
   dec(_dec, spec, isfield);
@@ -222,7 +224,7 @@ cmm_type *declist(ast_node *root, cmm_type *spec, int isfield) {
   return spec;
 }
 
-void dec(ast_node *root, cmm_type *spec, int isfield) {
+static void dec(ast_node *root, cmm_type *spec, int isfield) {
   ast_node *_vardec = get_child_n(root, 0);
   ast_node *_exp = get_child_n(root, 2);
   symbol *sym = vardec(root, spec, isfield);
@@ -231,7 +233,7 @@ void dec(ast_node *root, cmm_type *spec, int isfield) {
   }
 }
 
-cmm_type *exp(ast_node *root) { //屎
+static cmm_type *exp(ast_node *root) { //屎
   switch (root->childnum) {
   case 1: { // ID INT FLOAT
     ast_node *ch = get_child_last(root);
@@ -288,29 +290,91 @@ cmm_type *exp(ast_node *root) { //屎
       ast_node *ch2 = get_child_n(root, 1);
       switch (ch2->symbol) {
       case DOT: {
-        cmm_type *h = exp(head);
+        cmm_type *h = exp(head); // struct
         if (!h->is_basetype || h->btype->dectype != STRUCT) {
           error(13, head->lineno);
           return new_errtype(ERR_TYPEDISMATCH);
         }
-        ast_node *_id = get_child_last(root);
+        ast_node *_id = get_child_last(root); // struct._id
         char *n = _id->value.str_val;
-        cmm_type *pos;
-        list_entry *head = &h->struct_fields; // super deceiving myself
+        symbol *sym = frame_lookup(currf, h->btype->struct_name);
+        if (!sym) {
+          error(1, head->lineno);
+          return new_errtype(ERR_UNDEFINE);
+        }
+        symbol *field = frame_slookup(currf, n);
+        if (!field) {
+          error(14, _id->lineno);
+          return new_errtype(ERR_UNDEFINE);
+        }
+        return field->type;
       } break;
+      case AND:
+      case OR: {
+        ast_node *exp1 = get_child_n(root, 0);
+        ast_node *exp2 = get_child_last(root);
+        cmm_type *et1 = exp(exp1);
+        cmm_type *et2 = exp(exp2);
+        if (!et1->is_basetype || !et2->is_basetype)
+          return new_errtype(ERR_TYPEDISMATCH);
+        if (!et1->btype->dectype != !et2->btype->dectype ||
+            et1->btype->dectype != INT)
+          return new_errtype(ERR_TYPEDISMATCH);
+        TODO(); // should have errored.
+        return et1;
+      } break;
+      case ASSIGNOP: {
+        TODO();
+      } break;
+      case RELOP:
+      case PLUS:
+      case MINUS:
+      case STAR:
+      case DIV: {
+        ast_node *exp1 = get_child_n(root, 0);
+        ast_node *exp2 = get_child_last(root);
+        cmm_type *et1 = exp(exp1);
+        cmm_type *et2 = exp(exp2);
+        if (!et1->is_basetype || !et2->is_basetype)
+          return new_errtype(ERR_TYPEDISMATCH);
+        if (!et1->btype->dectype != !et2->btype->dectype ||
+            et1->btype->dectype == STRUCT)
+          return new_errtype(ERR_TYPEDISMATCH);
+        TODO(); // should have errored.
+        return et1;
+      } break;
+      default:assert(0);
       }
     }
     }
   } break;
   case 4: {
-    assert(0);
+    ast_node *head = get_child_n(root, 0);
+    if (head->symbol == ID) {
+      TODO();
+    } else if (head->symbol == Exp) {
+      cmm_type *atype = exp(head);
+      if (atype->is_basetype || atype->ctype != TYPE_ARR) {
+        error(10, head->lineno);
+        return new_errtype(ERR_TYPEDISMATCH);
+      }
+      ast_node *index = get_child_n(root, 2);
+      cmm_type *_index = exp(index);
+      if (!_index->is_basetype || _index->btype->dectype != INT) {
+        error(12, index->lineno);
+        return new_errtype(ERR_TYPEDISMATCH);
+      }
+      TODO(); // lvalue
+      return new_cmm_btype(atype->btype);
+    } else
+      assert(0);
   } break;
   default:
     assert(0);
   }
 }
 
-cmm_type *structspecifier(ast_node *root) {
+static cmm_type *structspecifier(ast_node *root) {
   ast_node *_deflist = get_child_n(root, 3);
   if (_deflist) { // struct opttag lc deflist rc
     ast_node *_opttag = get_child_n(root, 1);
@@ -335,7 +399,7 @@ cmm_type *structspecifier(ast_node *root) {
   }
 }
 
-char *opttag(ast_node *root) {
+static char *opttag(ast_node *root) {
   ast_node *_id = get_child_n(root, 0);
   if (_id)
     return _id->value.str_val;

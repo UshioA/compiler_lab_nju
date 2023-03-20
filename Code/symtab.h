@@ -1,6 +1,7 @@
 #ifndef __CMM_SYMTAB_H__
 #define __CMM_SYMTAB_H__
 #include "common.h"
+#include "frame.h"
 #include "list.h"
 #include "type.h"
 #include <stdint.h>
@@ -16,6 +17,7 @@ typedef struct symbol { // variable, function, array, struct
     int ival;            // int type
     float fval;          // float type
     uint32_t *dimension; // use dimension[0] as len.
+    frame *fields;
   };
 } symbol;
 
@@ -43,7 +45,7 @@ typedef struct symtab_entry {
   list_entry link;
 } sentry;
 static symbol *_make_symbol(cmm_type *ctype, char *name, int ival, float fval,
-                            uint32_t *dimension);
+                            uint32_t *dimension, int ftype);
 
 symbol *make_symbol(char *name, cmm_type *ctype);
 symbol *make_isymbol(char *name, uint32_t ival);

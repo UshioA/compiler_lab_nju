@@ -1,4 +1,5 @@
 #include "symtab.h"
+#include "frame.h"
 #include "list.h"
 #include "syntax.tab.h"
 #include "type.h"
@@ -6,7 +7,7 @@
 #include <stdint.h>
 
 static symbol *_make_symbol(cmm_type *ctype, char *name, int ival, float fval,
-                            uint32_t *dimension) {
+                            uint32_t *dimension, int ftype) {
   symbol *sym = malloc(sizeof(symbol));
   sym->name = name;
   sym->type = ctype;
@@ -16,6 +17,8 @@ static symbol *_make_symbol(cmm_type *ctype, char *name, int ival, float fval,
       sym->ival = ival;
     } else if (btype->dectype == FLOAT) {
       sym->fval = fval;
+    } else if (btype->dectype == STRUCT) {
+      sym->fields = make_frame(NULL, ftype);
     }
   } else { // only handle array, store dimensions
     sym->dimension = dimension;
@@ -49,20 +52,20 @@ symbol *make_symbol(char *name, cmm_type *ctype) {
 }
 
 symbol *make_isymbol(char *name, uint32_t ival) {
-  return _make_symbol(new_cmm_btype(new_literal(INT)), name, ival, 0, NULL);
+  return _make_symbol(new_cmm_btype(new_literal(INT)), name, ival, 0, NULL, -1);
 }
 symbol *make_fsymbol(char *name, float fval) {
-  return _make_symbol(new_cmm_btype(new_literal(FLOAT)), name, 0, fval, NULL);
+  return _make_symbol(new_cmm_btype(new_literal(FLOAT)), name, 0, fval, NULL, -1);
 }
 symbol *make_asymbol(char *name, cmm_type *basetype, uint32_t *dimension) {
   return _make_symbol(new_cmm_ctype(TYPE_ARR, basetype->btype), name, 0, 0,
-                      dimension);
+                      dimension, -1);
 }
 symbol *make_ssymbol(char *name, cmm_type *ctype) {
-  return _make_symbol(ctype, name, 0, 0, 0);
+  return _make_symbol(ctype, name, 0, 0, 0, 2);
 }
 symbol *make_funsymbol(char *name, cmm_type *ctype) {
-  return _make_symbol(ctype, name, 0, 0, 0);
+  return _make_symbol(ctype, name, 0, 0, 0, -1);
 }
 
 int symbol_isbtype(symbol *s) { return s->type->is_basetype; }

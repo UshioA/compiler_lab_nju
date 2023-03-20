@@ -5,7 +5,7 @@
 #include "syntax.tab.h"
 typedef struct base_type {
   int dectype;
-  const char *struct_name; // if is struct.
+  char *struct_name; // if is struct.
 } base_type;               // `Specifier' in Grammar.
 
 typedef struct {
@@ -34,6 +34,7 @@ typedef struct {
     list_entry contain_types; // summary dogshit.
   };
   int contain_len;
+  int is_left;
 } cmm_type;
 
 static base_type *__new_btype(int dectype, const char *struct_name);
