@@ -27,7 +27,7 @@ struct symbol *frame_lookup(frame *f, char *name) {
   if (sym)
     return sym;
   if (f->parent)
-    return frame_lookup(f, name);
+    return frame_lookup(f->parent, name);
   return NULL;
 }
 

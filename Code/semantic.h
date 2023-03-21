@@ -10,7 +10,7 @@ extern frame *global;
 extern frame *currf; // this name is bad =)
 
 static inline void error(int errno, int lineno) {
-  fprintf(stdout, "Error type %d at Line %d: .", errno, lineno);
+  fprintf(stdout, "Error type %d at Line %d: .\n", errno, lineno);
 }
 
 static inline void init_global() {
@@ -59,8 +59,10 @@ static cmm_type *expr(ast_node *root);
 
 static void paramdec(ast_node *root, cmm_type *_v);
 
-static void args(ast_node* root, cmm_type* functype);
+static void args(ast_node *root, cmm_type *functype);
 
-static void stmtlist(ast_node*);
+static void stmtlist(ast_node *, cmm_type *);
+
+static void stmt(ast_node *, cmm_type *);
 
 #endif

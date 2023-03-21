@@ -1,8 +1,9 @@
 #include "ast.h"
+#include "semantic.h"
 #include "syntax.tab.h"
 #include <stdio.h>
 void yyrestart(FILE *);
-int yyparse(ast_node*);
+int yyparse(ast_node *);
 extern int parerr;
 int main(int argc, char **argv) {
   if (argc <= 1)
@@ -14,7 +15,9 @@ int main(int argc, char **argv) {
   }
   yyrestart(f);
   if (!yyparse(ast_root))
-    if(!parerr)
+    if (!parerr) {
       print_ast(ast_root);
+      do_semantic(ast_root);
+    }
   return 0;
 }
