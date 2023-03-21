@@ -55,8 +55,12 @@ static void varlist(ast_node *root, cmm_type *_v);
 
 static symbol *vardec(ast_node *root, cmm_type *type, int isfield);
 
-static cmm_type *exp(ast_node *root);
+static cmm_type *expr(ast_node *root);
 
 static void paramdec(ast_node *root, cmm_type *_v);
+
+static void args(ast_node* root, cmm_type* functype);
+
+static void stmtlist(ast_node*);
 
 #endif

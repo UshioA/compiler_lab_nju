@@ -3,7 +3,7 @@
 #include "list.h"
 #include "syntax.tab.h"
 
-static base_type *__new_btype(int dectype, const char *struct_name) {
+static base_type *__new_btype(int dectype, char *struct_name) {
   base_type *btype = malloc(sizeof(base_type));
   btype->dectype = dectype;
   btype->struct_name = struct_name;
@@ -12,7 +12,7 @@ static base_type *__new_btype(int dectype, const char *struct_name) {
 
 base_type *new_literal(int dectype) { return __new_btype(dectype, NULL); }
 
-base_type *new_struct_type(const char *struct_name) {
+base_type *new_struct_type(char *struct_name) {
   return __new_btype(STRUCT, struct_name);
 }
 

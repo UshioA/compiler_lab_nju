@@ -560,8 +560,8 @@ static const yytype_int16 yyrline[] =
      149,   150,   156,   159,   160,   164,   166,   172,   174,   178,
      179,   180,   185,   189,   195,   203,   213,   221,   225,   230,
      230,   231,   236,   237,   240,   245,   246,   249,   255,   258,
-     264,   270,   276,   282,   288,   294,   300,   306,   312,   317,
-     322,   329,   335,   342,   348,   352,   356,   359,   376,   381,
+     265,   272,   278,   284,   290,   296,   302,   308,   314,   320,
+     326,   332,   338,   343,   348,   352,   356,   359,   376,   381,
      385
 };
 #endif
@@ -636,11 +636,11 @@ static const yytype_int8 yydefact[] =
       25,    12,     0,     0,    27,    56,     0,    53,    17,    48,
       27,    34,    28,     0,    26,    37,    75,    76,    74,     0,
        0,     0,     0,     0,     0,    42,     0,     0,     0,     0,
-      51,     0,    31,     0,    77,    68,    69,     0,     0,     0,
+      51,     0,    31,     0,    77,    72,    73,     0,     0,     0,
        0,    36,    38,     0,    41,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,    57,    54,    77,    71,    79,     0,
-      67,    43,     0,     0,    59,    62,    63,    64,    65,    66,
-      60,    61,    73,     0,     0,    70,     0,     0,    72,    78,
+       0,     0,     0,     0,    57,    54,    77,    69,    79,     0,
+      70,    43,     0,     0,    61,    64,    65,    66,    67,    68,
+      62,    63,    71,     0,     0,    59,     0,     0,    60,    78,
       37,    44,    46,     0,    45
 };
 
@@ -774,9 +774,9 @@ static const yytype_int8 yyr2[] =
        1,     0,     1,     1,     1,     1,     4,     1,     4,     3,
        1,     3,     1,     1,     2,     1,     4,     1,     2,     0,
        1,     2,     1,     3,     5,     7,     5,     1,     2,     0,
-       1,     3,     1,     1,     3,     1,     1,     3,     1,     3,
-       3,     3,     3,     3,     3,     3,     3,     3,     2,     2,
-       4,     3,     4,     3,     1,     1,     1,     1,     3,     1,
+       1,     3,     1,     1,     3,     1,     1,     3,     1,     4,
+       4,     3,     3,     3,     3,     3,     3,     3,     3,     3,
+       3,     3,     2,     2,     1,     1,     1,     1,     3,     1,
        1
 };
 
@@ -1853,165 +1853,165 @@ yyreduce:
 #line 1854 "./syntax.tab.c"
     break;
 
-  case 59: /* Exp: Exp ASSIGNOP Exp  */
+  case 59: /* Exp: ID LP Args RP  */
 #line 258 "./syntax.y"
+                   {
+      yyval = make_ast_nonterm(Exp);
+      add_ast_child(yyval, yyvsp[-3]);
+      add_ast_child(yyval, yyvsp[-2]);
+      add_ast_child(yyval, yyvsp[-1]);
+      add_ast_child(yyval, yyvsp[0]);
+    }
+#line 1866 "./syntax.tab.c"
+    break;
+
+  case 60: /* Exp: Exp LB Exp RB  */
+#line 265 "./syntax.y"
+                   {
+      yyval = make_ast_nonterm(Exp);
+      add_ast_child(yyval, yyvsp[-3]);
+      add_ast_child(yyval, yyvsp[-2]);
+      add_ast_child(yyval, yyvsp[-1]);
+      add_ast_child(yyval, yyvsp[0]);
+    }
+#line 1878 "./syntax.tab.c"
+    break;
+
+  case 61: /* Exp: Exp ASSIGNOP Exp  */
+#line 272 "./syntax.y"
                      {
       yyval = make_ast_nonterm(Exp);
       add_ast_child(yyval, yyvsp[-2]);
       add_ast_child(yyval, yyvsp[-1]);
       add_ast_child(yyval, yyvsp[0]);
     }
-#line 1865 "./syntax.tab.c"
+#line 1889 "./syntax.tab.c"
     break;
 
-  case 60: /* Exp: Exp AND Exp  */
-#line 264 "./syntax.y"
+  case 62: /* Exp: Exp AND Exp  */
+#line 278 "./syntax.y"
                  {
       yyval = make_ast_nonterm(Exp);
       add_ast_child(yyval, yyvsp[-2]);
       add_ast_child(yyval, yyvsp[-1]);
       add_ast_child(yyval, yyvsp[0]);
     }
-#line 1876 "./syntax.tab.c"
+#line 1900 "./syntax.tab.c"
     break;
 
-  case 61: /* Exp: Exp OR Exp  */
-#line 270 "./syntax.y"
+  case 63: /* Exp: Exp OR Exp  */
+#line 284 "./syntax.y"
                 {
       yyval = make_ast_nonterm(Exp);
       add_ast_child(yyval, yyvsp[-2]);
       add_ast_child(yyval, yyvsp[-1]);
       add_ast_child(yyval, yyvsp[0]);
     }
-#line 1887 "./syntax.tab.c"
+#line 1911 "./syntax.tab.c"
     break;
 
-  case 62: /* Exp: Exp RELOP Exp  */
-#line 276 "./syntax.y"
+  case 64: /* Exp: Exp RELOP Exp  */
+#line 290 "./syntax.y"
                    {
       yyval = make_ast_nonterm(Exp);
       add_ast_child(yyval, yyvsp[-2]);
       add_ast_child(yyval, yyvsp[-1]);
       add_ast_child(yyval, yyvsp[0]);
     }
-#line 1898 "./syntax.tab.c"
+#line 1922 "./syntax.tab.c"
     break;
 
-  case 63: /* Exp: Exp PLUS Exp  */
-#line 282 "./syntax.y"
+  case 65: /* Exp: Exp PLUS Exp  */
+#line 296 "./syntax.y"
                   {
       yyval = make_ast_nonterm(Exp);
       add_ast_child(yyval, yyvsp[-2]);
       add_ast_child(yyval, yyvsp[-1]);
       add_ast_child(yyval, yyvsp[0]);
     }
-#line 1909 "./syntax.tab.c"
+#line 1933 "./syntax.tab.c"
     break;
 
-  case 64: /* Exp: Exp MINUS Exp  */
-#line 288 "./syntax.y"
+  case 66: /* Exp: Exp MINUS Exp  */
+#line 302 "./syntax.y"
                    {
       yyval = make_ast_nonterm(Exp);
       add_ast_child(yyval, yyvsp[-2]);
       add_ast_child(yyval, yyvsp[-1]);
       add_ast_child(yyval, yyvsp[0]);
     }
-#line 1920 "./syntax.tab.c"
+#line 1944 "./syntax.tab.c"
     break;
 
-  case 65: /* Exp: Exp STAR Exp  */
-#line 294 "./syntax.y"
+  case 67: /* Exp: Exp STAR Exp  */
+#line 308 "./syntax.y"
                   {
       yyval = make_ast_nonterm(Exp);
       add_ast_child(yyval, yyvsp[-2]);
       add_ast_child(yyval, yyvsp[-1]);
       add_ast_child(yyval, yyvsp[0]);
     }
-#line 1931 "./syntax.tab.c"
+#line 1955 "./syntax.tab.c"
     break;
 
-  case 66: /* Exp: Exp DIV Exp  */
-#line 300 "./syntax.y"
+  case 68: /* Exp: Exp DIV Exp  */
+#line 314 "./syntax.y"
                  {
       yyval = make_ast_nonterm(Exp);
       add_ast_child(yyval, yyvsp[-2]);
       add_ast_child(yyval, yyvsp[-1]);
       add_ast_child(yyval, yyvsp[0]);
     }
-#line 1942 "./syntax.tab.c"
+#line 1966 "./syntax.tab.c"
     break;
 
-  case 67: /* Exp: LP Exp RP  */
-#line 306 "./syntax.y"
-               {
-      yyval = make_ast_nonterm(Exp);
-      add_ast_child(yyval, yyvsp[-2]);
-      add_ast_child(yyval, yyvsp[-1]);
-      add_ast_child(yyval, yyvsp[0]);
-    }
-#line 1953 "./syntax.tab.c"
-    break;
-
-  case 68: /* Exp: MINUS Exp  */
-#line 312 "./syntax.y"
-                            {
-      yyval = make_ast_nonterm(Exp);
-      add_ast_child(yyval, yyvsp[-1]);
-      add_ast_child(yyval, yyvsp[0]);
-    }
-#line 1963 "./syntax.tab.c"
-    break;
-
-  case 69: /* Exp: NOT Exp  */
-#line 317 "./syntax.y"
-             {
-      yyval = make_ast_nonterm(Exp);
-      add_ast_child(yyval, yyvsp[-1]);
-      add_ast_child(yyval, yyvsp[0]);
-    }
-#line 1973 "./syntax.tab.c"
-    break;
-
-  case 70: /* Exp: ID LP Args RP  */
-#line 322 "./syntax.y"
-                   {
-      yyval = make_ast_nonterm(Exp);
-      add_ast_child(yyval, yyvsp[-3]);
-      add_ast_child(yyval, yyvsp[-2]);
-      add_ast_child(yyval, yyvsp[-1]);
-      add_ast_child(yyval, yyvsp[0]);
-    }
-#line 1985 "./syntax.tab.c"
-    break;
-
-  case 71: /* Exp: ID LP RP  */
-#line 329 "./syntax.y"
+  case 69: /* Exp: ID LP RP  */
+#line 320 "./syntax.y"
               {
       yyval = make_ast_nonterm(Exp);
       add_ast_child(yyval, yyvsp[-2]);
       add_ast_child(yyval, yyvsp[-1]);
       add_ast_child(yyval, yyvsp[0]);
     }
-#line 1996 "./syntax.tab.c"
+#line 1977 "./syntax.tab.c"
     break;
 
-  case 72: /* Exp: Exp LB Exp RB  */
-#line 335 "./syntax.y"
-                   {
+  case 70: /* Exp: LP Exp RP  */
+#line 326 "./syntax.y"
+               {
       yyval = make_ast_nonterm(Exp);
-      add_ast_child(yyval, yyvsp[-3]);
       add_ast_child(yyval, yyvsp[-2]);
       add_ast_child(yyval, yyvsp[-1]);
       add_ast_child(yyval, yyvsp[0]);
     }
-#line 2008 "./syntax.tab.c"
+#line 1988 "./syntax.tab.c"
     break;
 
-  case 73: /* Exp: Exp DOT ID  */
-#line 342 "./syntax.y"
+  case 71: /* Exp: Exp DOT ID  */
+#line 332 "./syntax.y"
                 {
       yyval = make_ast_nonterm(Exp);
       add_ast_child(yyval, yyvsp[-2]);
+      add_ast_child(yyval, yyvsp[-1]);
+      add_ast_child(yyval, yyvsp[0]);
+    }
+#line 1999 "./syntax.tab.c"
+    break;
+
+  case 72: /* Exp: MINUS Exp  */
+#line 338 "./syntax.y"
+                            {
+      yyval = make_ast_nonterm(Exp);
+      add_ast_child(yyval, yyvsp[-1]);
+      add_ast_child(yyval, yyvsp[0]);
+    }
+#line 2009 "./syntax.tab.c"
+    break;
+
+  case 73: /* Exp: NOT Exp  */
+#line 343 "./syntax.y"
+             {
+      yyval = make_ast_nonterm(Exp);
       add_ast_child(yyval, yyvsp[-1]);
       add_ast_child(yyval, yyvsp[0]);
     }

@@ -37,11 +37,11 @@ typedef struct {
   int is_left;
 } cmm_type;
 
-static base_type *__new_btype(int dectype, const char *struct_name);
+static base_type *__new_btype(int dectype, char *struct_name);
 
 base_type *new_literal(int dectype);
 
-base_type *new_struct_type(const char *struct_name);
+base_type *new_struct_type(char *struct_name);
 
 static cmm_type *__new_cmm_type(int is_basetype, int ctype,
                                 base_type *return_type, base_type *btype);

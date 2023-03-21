@@ -229,11 +229,11 @@ static void dec(ast_node *root, cmm_type *spec, int isfield) {
   ast_node *_exp = get_child_n(root, 2);
   symbol *sym = vardec(root, spec, isfield);
   if (_exp) {
-    cmm_type *exptype = exp(_exp);
+    cmm_type *exptype = expr(_exp);
   }
 }
 
-static cmm_type *exp(ast_node *root) { //屎
+static cmm_type *expr(ast_node *root) { //屎
   switch (root->childnum) {
   case 1: { // ID INT FLOAT
     ast_node *ch = get_child_last(root);
@@ -256,7 +256,7 @@ static cmm_type *exp(ast_node *root) { //屎
   } break;
   case 2: { // MINUS EXP | NOT EXP
     ast_node *_exp = get_child_last(root);
-    cmm_type *etype = exp(_exp);
+    cmm_type *etype = expr(_exp);
     ast_node *op = get_child_n(root, 0);
     if (op->symbol == NOT) {
       if (!etype->is_basetype || etype->btype->dectype != FLOAT) {
@@ -284,13 +284,13 @@ static cmm_type *exp(ast_node *root) { //屎
       return sym->type;
     } break;
     case LP: { // bullshit =)
-      return exp(get_child_n(root, 1));
+      return expr(get_child_n(root, 1));
     } break;
     case Exp: {
       ast_node *ch2 = get_child_n(root, 1);
       switch (ch2->symbol) {
       case DOT: {
-        cmm_type *h = exp(head); // struct
+        cmm_type *h = expr(head); // struct
         if (!h->is_basetype || h->btype->dectype != STRUCT) {
           error(13, head->lineno);
           return new_errtype(ERR_TYPEDISMATCH);
@@ -313,8 +313,8 @@ static cmm_type *exp(ast_node *root) { //屎
       case OR: {
         ast_node *exp1 = get_child_n(root, 0);
         ast_node *exp2 = get_child_last(root);
-        cmm_type *et1 = exp(exp1);
-        cmm_type *et2 = exp(exp2);
+        cmm_type *et1 = expr(exp1);
+        cmm_type *et2 = expr(exp2);
         if (!et1->is_basetype || !et2->is_basetype)
           return new_errtype(ERR_TYPEDISMATCH);
         if (!et1->btype->dectype != !et2->btype->dectype ||
@@ -333,8 +333,8 @@ static cmm_type *exp(ast_node *root) { //屎
       case DIV: {
         ast_node *exp1 = get_child_n(root, 0);
         ast_node *exp2 = get_child_last(root);
-        cmm_type *et1 = exp(exp1);
-        cmm_type *et2 = exp(exp2);
+        cmm_type *et1 = expr(exp1);
+        cmm_type *et2 = expr(exp2);
         if (!et1->is_basetype || !et2->is_basetype)
           return new_errtype(ERR_TYPEDISMATCH);
         if (!et1->btype->dectype != !et2->btype->dectype ||
@@ -343,7 +343,8 @@ static cmm_type *exp(ast_node *root) { //屎
         TODO(); // should have errored.
         return et1;
       } break;
-      default:assert(0);
+      default:
+        assert(0);
       }
     }
     }
@@ -351,15 +352,22 @@ static cmm_type *exp(ast_node *root) { //屎
   case 4: {
     ast_node *head = get_child_n(root, 0);
     if (head->symbol == ID) {
-      TODO();
+      ast_node *_args = get_child_n(root, 2);
+      symbol *fsym = frame_lookup(currf, head->value.str_val);
+      if (!fsym) {
+        error(2, head->lineno);
+        return new_errtype(ERR_UNDEFINE);
+      }
+      args(_args, fsym->type);
+      return new_cmm_btype(fsym->type->return_type);
     } else if (head->symbol == Exp) {
-      cmm_type *atype = exp(head);
+      cmm_type *atype = expr(head);
       if (atype->is_basetype || atype->ctype != TYPE_ARR) {
         error(10, head->lineno);
         return new_errtype(ERR_TYPEDISMATCH);
       }
       ast_node *index = get_child_n(root, 2);
-      cmm_type *_index = exp(index);
+      cmm_type *_index = expr(index);
       if (!_index->is_basetype || _index->btype->dectype != INT) {
         error(12, index->lineno);
         return new_errtype(ERR_TYPEDISMATCH);
@@ -372,6 +380,9 @@ static cmm_type *exp(ast_node *root) { //屎
   default:
     assert(0);
   }
+  assert(0);
+  // should never come here.
+  return NULL;
 }
 
 static cmm_type *structspecifier(ast_node *root) {
@@ -404,4 +415,12 @@ static char *opttag(ast_node *root) {
   if (_id)
     return _id->value.str_val;
   return NULL;
+}
+
+static void args(ast_node* root, cmm_type* functype){
+
+}
+
+static void stmtlist(ast_node* root){
+
 }
