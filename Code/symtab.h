@@ -17,8 +17,8 @@ typedef struct symbol { // variable, function, array, struct
     int ival;            // int type
     float fval;          // float type
     uint32_t *dimension; // use dimension[0] as len.
-    frame *fields;
   };
+  frame *fields;
 } symbol;
 
 static inline uint32_t __fnv_hash(char *str, uint32_t length) {

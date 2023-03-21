@@ -55,6 +55,7 @@ Program: ExtDefList {
   ast_root = $$;
   add_ast_child($$, $1);
 } 
+| error {ERR();ast_root=$$=NULL;}
 ExtDefList: ExtDef ExtDefList {
     $$ = make_ast_nonterm(ExtDefList);
     add_ast_child($$, $1);
@@ -62,6 +63,7 @@ ExtDefList: ExtDef ExtDefList {
   }
   | {$$ = NULL;} 
   
+  | error {ERR();$$=NULL;}
 ExtDef: Specifier ExtDecList SEMI {
     $$ = make_ast_nonterm(ExtDef);
     add_ast_child($$, $1);
@@ -80,6 +82,7 @@ ExtDef: Specifier ExtDecList SEMI {
     add_ast_child($$, $3);
   }
   
+  | error {ERR();$$=NULL;}
 ExtDecList: VarDec {
     $$ = make_ast_nonterm(ExtDecList);
     add_ast_child($$, $1);
@@ -90,6 +93,7 @@ ExtDecList: VarDec {
     add_ast_child($$, $2);
     add_ast_child($$, $3);
   }
+  | error {ERR();$$=NULL;}
 /* Specifiers */
 Specifier: TYPE {
     $$ = make_ast_nonterm(Specifier);
@@ -100,6 +104,7 @@ Specifier: TYPE {
     add_ast_child($$, $1);
   }
   
+  | error {ERR();$$=NULL;}
 StrtuctSpecifier: STRUCT OptTag LC DefList RC {
                     $$ = make_ast_nonterm(StructSpecifier);
                     add_ast_child($$, $1);
@@ -114,14 +119,17 @@ StrtuctSpecifier: STRUCT OptTag LC DefList RC {
                     add_ast_child($$, $2);
                   }
                   
+                  | error {ERR();$$=NULL;}
 OptTag: ID {
   $$ = make_ast_nonterm(OptTag);
   add_ast_child($$, $1);
 } | {$$=NULL;} 
+| error {ERR();$$=NULL;}
 Tag: ID {
   $$ = make_ast_nonterm(Tag);
   add_ast_child($$, $1);
 } 
+| error {ERR();$$=NULL;}
 /* Declarators */
 VarDec: ID {
           $$ = make_ast_nonterm(VarDec);
@@ -134,6 +142,7 @@ VarDec: ID {
           add_ast_child($$, $3);
           add_ast_child($$, $4);
         }
+        | error {ERR();$$=NULL;}
 FunDec: ID LP VarList RP {
           $$ = make_ast_nonterm(FunDec);
           add_ast_child($$, $1);
@@ -147,6 +156,7 @@ FunDec: ID LP VarList RP {
           add_ast_child($$, $2);
           add_ast_child($$, $3);
         }
+        | error {ERR();$$=NULL;}
 VarList: ParamDec COMMA VarList {
           $$ = make_ast_nonterm(VarList);
           add_ast_child($$, $1);
@@ -157,11 +167,13 @@ VarList: ParamDec COMMA VarList {
           $$ = make_ast_nonterm(VarList);
           add_ast_child($$, $1);
         }
+        | error {ERR();$$=NULL;}
 ParamDec: Specifier VarDec {
   $$ = make_ast_nonterm(ParamDec);
   add_ast_child($$, $1);
   add_ast_child($$, $2);
 }
+| error {ERR();$$=NULL;}
 
 CompSt: LC DefList StmtList RC {
   $$ = make_ast_nonterm(CompSt);
@@ -170,14 +182,15 @@ CompSt: LC DefList StmtList RC {
   add_ast_child($$, $3);
   add_ast_child($$, $4);
 }
+| error {ERR();$$=NULL;}
 
 StmtList: Stmt StmtList {
           $$ = make_ast_nonterm(StmtList);
           add_ast_child($$, $1);
           add_ast_child($$, $2);
-        } 
-        | {$$=NULL;}
+        } | {$$=NULL;}
         
+        | error {ERR();$$=NULL;}
 Stmt: Exp SEMI {
       $$ = make_ast_nonterm(Stmt);
       add_ast_child($$, $1);
@@ -220,8 +233,11 @@ Stmt: Exp SEMI {
       add_ast_child($$, $5);
     }
     
+    | error {$$=NULL;}
     /* 
+    | error SEMI {$$=NULL;} */
     /* 
+    | error RB {$$=NULL;} */
 /* Local Definitions */
 DefList: Def DefList {
       $$ = make_ast_nonterm(DefList);
@@ -229,12 +245,14 @@ DefList: Def DefList {
       add_ast_child($$, $2);
     }|
     {$$ = NULL;}
+    | error {ERR();$$=NULL;}
 Def: Specifier DecList SEMI {
       $$ = make_ast_nonterm(Def);
       add_ast_child($$, $1);
       add_ast_child($$, $2);
       add_ast_child($$, $3);
     }
+    | error {ERR();$$=NULL;}
 DecList: Dec {
       $$ = make_ast_nonterm(DecList);
       add_ast_child($$, $1);
@@ -244,6 +262,7 @@ DecList: Dec {
       add_ast_child($$, $2);
       add_ast_child($$, $3);
     }
+    | error {ERR();$$=NULL;}
 Dec: VarDec {
       $$ = make_ast_nonterm(Dec);
       add_ast_child($$, $1);
@@ -254,6 +273,7 @@ Dec: VarDec {
       add_ast_child($$, $3);
     }
     
+    | error {ERR();$$=NULL;}
 /* Expressions */
 Exp:
      ID LP Args RP {
@@ -358,6 +378,7 @@ Exp:
       $$ = make_ast_nonterm(Exp);
       add_ast_child($$, $1);
     }
+    | error {ERR();$$=NULL;}
     /* | Ex
     p error SEMI        {ERR("fo0l!");} */
     /* | Exp ASSIGNO
@@ -400,6 +421,7 @@ Args: Exp COMMA Args {
       add_ast_child($$, $1);
     }
     
+    | error {ERR();$$=NULL;}
 %%
 
 void yyerror(ast_node* para, char* fmt, ...){

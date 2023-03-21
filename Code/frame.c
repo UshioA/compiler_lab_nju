@@ -40,7 +40,7 @@ struct symbol *frame_slookup(frame *f, char *name) {
   if (sym)
     return sym;
   if (f->parent)
-    return frame_slookup(f, name);
+    return frame_slookup(f->parent, name);
   return NULL;
 }
 

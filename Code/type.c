@@ -1,4 +1,5 @@
 #include "type.h"
+#include "ast.h"
 #include "common.h"
 #include "list.h"
 #include "syntax.tab.h"
@@ -16,8 +17,8 @@ base_type *new_struct_type(char *struct_name) {
   return __new_btype(STRUCT, struct_name);
 }
 
-static cmm_type *__new_cmm_type(int is_basetype, int ctype,
-                                base_type *return_type, base_type *btype) {
+cmm_type *__new_cmm_type(int is_basetype, int ctype, base_type *return_type,
+                         base_type *btype) {
   cmm_type *c = malloc(sizeof(cmm_type));
   c->is_basetype = is_basetype;
   c->ctype = ctype;
@@ -29,15 +30,18 @@ static cmm_type *__new_cmm_type(int is_basetype, int ctype,
     c->return_type = return_type;
   }
   list_init(&c->link);
-  list_init(&c->contain_types);
   c->contain_len = -1;
   c->errcode = NO_ERR;
+  c->is_left = 1;
   return c;
 }
 
 cmm_type *new_errtype(int errcode) {
   cmm_type *err = malloc(sizeof(cmm_type));
+  err->is_basetype = 1;
+  err->btype = new_literal(INT);
   err->errcode = errcode;
+  err->is_left = 1;
   return err;
 }
 
@@ -45,8 +49,14 @@ int cmm_compute_len(cmm_type *ptr) {
   if (ptr->contain_len != -1)
     return ptr->contain_len;
   int cnt = 0;
-  list_entry *p;
-  list_for_each(p, &ptr->contain_types) { ++cnt; }
+  list_entry *pos;
+  list_entry *head = ptr->contain_types;
+  if (head) {
+    for (pos = head->next; pos != head; pos = pos->next) {
+      ++cnt;
+      assert(cnt <= 10);
+    }
+  }
   ptr->contain_len = cnt;
   return cnt;
 }
@@ -71,9 +81,14 @@ void ctype_add_tail(cmm_type *ptr, cmm_type *head) {
   list_add_tail(&ptr->link, &head->link);
 }
 
-void ctype_set_contain_type(cmm_type *contain, cmm_type *head) {
-  contain->contain_types = head->contain_types;
-  contain->contain_len = -1;
+void ctype_set_contain_type(cmm_type *head, cmm_type *contain) {
+  head->contain_types = &contain->link;
+  head->contain_len = -1;
+  cmm_compute_len(head);
+}
+
+cmm_type *ctypecpy(cmm_type *t) {
+  return __new_cmm_type(t->is_basetype, t->ctype, t->return_type, t->btype);
 }
 
 /**
@@ -82,7 +97,7 @@ void ctype_set_contain_type(cmm_type *contain, cmm_type *head) {
 int btypecmp(base_type *b1, base_type *b2) {
   if (b1->dectype == b2->dectype) {
     if (b1->dectype == STRUCT) {
-      return !strcmp(b1->struct_name, b2->struct_name);
+      return strcmp(b1->struct_name, b2->struct_name);
     }
     return 0;
   }
@@ -107,9 +122,12 @@ int ctypecmp(cmm_type *c1, cmm_type *c2) {
     if (c1->ctype == TYPE_ARR) { // array dimensions.
       return c1->contain_len - c2->contain_len;
     } else {
+      if (c1->contain_len != c2->contain_len) {
+        return c1->contain_len - c2->contain_len;
+      }
       cmm_type *pos;
-      list_entry *head = &c1->contain_types;
-      list_entry *p2head = &c2->contain_types;
+      list_entry *head = c1->contain_types;
+      list_entry *p2head = c2->contain_types;
       cmm_type *p2 = le2(cmm_type, p2head->next, link);
       list_for_each_item(pos, head, link) {
         if (ctypecmp(pos, p2))

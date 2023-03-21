@@ -63,6 +63,8 @@ static void args(ast_node *root, cmm_type *functype);
 
 static void stmtlist(ast_node *, cmm_type *);
 
+static cmm_type* args_ass(ast_node* root, cmm_type* paramtypes);
+
 static void stmt(ast_node *, cmm_type *);
 
 #endif

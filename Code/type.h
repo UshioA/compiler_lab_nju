@@ -6,9 +6,9 @@
 typedef struct base_type {
   int dectype;
   char *struct_name; // if is struct.
-} base_type;               // `Specifier' in Grammar.
+} base_type;         // `Specifier' in Grammar.
 
-typedef struct {
+typedef struct cmm_type {
   int is_basetype;
   union {
     base_type *btype;
@@ -20,7 +20,6 @@ typedef struct {
     TYPE_ERR,
   } ctype; // indicates complex type. not sure if i should add `STRUCT' into
            // this.
-
   enum {
     NO_ERR,
     ERR_UNDEFINE,
@@ -29,9 +28,9 @@ typedef struct {
   } errcode;
   list_entry link;
   union {
-    list_entry struct_fields; // struct
-    list_entry param_types;   // func
-    list_entry contain_types; // summary dogshit.
+    list_entry *struct_fields; // struct
+    list_entry *param_types;   // func
+    list_entry *contain_types; // summary dogshit.
   };
   int contain_len;
   int is_left;
@@ -43,8 +42,8 @@ base_type *new_literal(int dectype);
 
 base_type *new_struct_type(char *struct_name);
 
-static cmm_type *__new_cmm_type(int is_basetype, int ctype,
-                                base_type *return_type, base_type *btype);
+cmm_type *__new_cmm_type(int is_basetype, int ctype, base_type *return_type,
+                         base_type *btype);
 
 cmm_type *new_cmm_btype(base_type *btype);
 
@@ -60,7 +59,9 @@ void ctype_add_head(cmm_type *ptr, cmm_type *head);
 
 void ctype_add_tail(cmm_type *ptr, cmm_type *head);
 
-void ctype_set_contain_type(cmm_type *contain, cmm_type *head);
+void ctype_set_contain_type(cmm_type *head, cmm_type *contain);
+
+cmm_type *ctypecpy(cmm_type *t);
 
 int btypecmp(base_type *b1, base_type *b2);
 

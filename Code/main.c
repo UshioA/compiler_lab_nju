@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
   yyrestart(f);
   if (!yyparse(ast_root))
     if (!parerr) {
-      print_ast(ast_root);
+      // print_ast(ast_root);
       do_semantic(ast_root);
     }
   return 0;
