@@ -12,10 +12,9 @@ frame *currf; // this name is bad =)
 
 static char *randstr() {
   char alphabet[28] = "abcdefghijklmnopqrstuvwxyz_";
-  srand(time(0));
   char *target = calloc(9, sizeof(char));
   for (int i = 0; i < 8; ++i) {
-    target[i] = rand() % 28;
+    target[i] = alphabet[rand() % 27];
   }
   return target;
 }
@@ -51,7 +50,7 @@ static void extdef(ast_node *root) {
   ast_node *ch3 = get_child_n(root, 2);
   cmm_type *spec;
   if (ch2->symbol == ExtDecList) {
-    spec = specifier(_specifier);
+    spec = specifier(_specifier, NULL);
     if (spec->errcode == ERR_REDEFINE) {
       error(16, _specifier->lineno);
     } else if (spec->errcode == ERR_UNDEFINE) {
@@ -59,12 +58,12 @@ static void extdef(ast_node *root) {
     }
     extdeclist(ch2, spec);
   } else if (ch2->symbol == SEMI) {
-    spec = specifier(_specifier);
+    spec = specifier(_specifier, NULL);
     if (spec->errcode == ERR_REDEFINE) {
       error(16, _specifier->lineno);
     }
   } else {
-    spec = specifier(_specifier);
+    spec = specifier(_specifier, NULL);
     if (spec->errcode == ERR_REDEFINE) {
       error(16, _specifier->lineno);
     } else if (spec->errcode == ERR_UNDEFINE) {
@@ -81,30 +80,39 @@ static void extdef(ast_node *root) {
   }
 }
 
-static cmm_type *specifier(ast_node *root) {
+static cmm_type *specifier(ast_node *root, cmm_type *_struct) {
   ast_node *ch1 = get_child_n(root, 0);
   if (ch1->symbol == TYPE) {
     return new_cmm_btype(
         new_literal(!strcmp("int", ch1->value.str_val) ? INT : FLOAT));
   } else {
-    return structspecifier(ch1);
+    return structspecifier(ch1, _struct);
   }
 }
 
-static cmm_type *structspecifier(ast_node *root) {
-  ast_node *_deflist = get_child_n(root, 3);
-  if (_deflist) { // struct opttag lc deflist rc
-    ast_node *_opttag = get_child_n(root, 1);
-    char *_id = opttag(_opttag);
-    if (!_id)
+static cmm_type *structspecifier(ast_node *root, cmm_type *_struct) {
+  ast_node *_opttag = get_child_n(root, 1);
+  ast_node *_deflist;
+  char *_id;
+  if (root->childnum > 2) {
+    if (_opttag->symbol == OptTag) { // struct opttag lc deflist rc
+      _deflist = get_child_n(root, 3);
+      _id = opttag(_opttag);
+    } else if (_opttag->symbol == LC) {
+      _deflist = get_child_n(root, 2);
       _id = randstr();
-    cmm_type *_struct = new_cmm_btype(new_struct_type(_id));
-    cmm_type *struct_fields =
-        deflist(_deflist, 1); // feel free to def struct fields in frames =(
-    ctype_set_contain_type(_struct, struct_fields);
+    }
+    // printf("enter struct %s\n", _id);
     symbol *some_struct = frame_local_lookup(currf, _id);
     if (some_struct) // already defined.
       return new_errtype(ERR_REDEFINE);
+    if (_struct) {
+      some_struct = frame_local_lookup(_struct->btype->struct_field, _id);
+      if (some_struct) // already defined.
+        return new_errtype(ERR_REDEFINE);
+    }
+    cmm_type *_struct = new_cmm_btype(new_struct_type(_id));
+    cmm_type *struct_fields = deflist(_deflist, 1, _struct);
     symset(currf->stab, _id, make_ssymbol(_id, _struct));
     return _struct;
   } else { // struct tag, meant to get some defined type.
@@ -121,7 +129,7 @@ static cmm_type *structspecifier(ast_node *root) {
 static void extdeclist(ast_node *root, cmm_type *spec) {
   ast_node *_vardec = get_child_n(root, 0);
   ast_node *_extdeclist = get_child_n(root, 2);
-  vardec(_vardec, spec, 0);
+  vardec(_vardec, spec, 0, NULL);
   if (_extdeclist) {
     extdeclist(_extdeclist, spec);
   }
@@ -141,28 +149,30 @@ static char *vardec_ass(ast_node *root, uint32_t **shape, int *size,
       free(*shape); // not leak =(
       *shape = _new;
     }
-    *shape[*size] = ival;
+    (*shape)[*size] = ival;
     ++(*size);
     return vardec_ass(get_child_n(root, 0), shape, size, capacity);
   }
   assert(0);
 }
 
-static symbol *vardec(ast_node *root, cmm_type *type, int isfield) {
+static symbol *vardec(ast_node *root, cmm_type *type, int isfield,
+                      cmm_type *_struct) {
   ast_node *ch1 = get_child_n(root, 0);
   int *size = malloc(sizeof(int));
   int *capacity = malloc(sizeof(int));
   *capacity = 16;
   *size = 0;
-  uint32_t *shape = malloc(sizeof(uint32_t) * (*capacity));
+  uint32_t *shape = calloc(*capacity, sizeof(uint32_t));
   memset(shape, 0, *capacity * sizeof(uint32_t));
   char *name = vardec_ass(ch1, &shape, size, capacity);
-  symbol *sym =
-      isfield ? symget(currf->sstab, name) : symget(currf->stab, name);
+  symbol *sym = isfield ? frame_local_lookup(_struct->btype->struct_field, name)
+                        : symget(currf->stab, name);
   if (sym) {
     error(isfield ? 15 : 3, root->lineno);
   } else {
-    sym = isfield ? frame_slookup(currf, name) : frame_lookup(currf, name);
+    sym = isfield ? frame_lookup(_struct->btype->struct_field, name)
+                  : frame_lookup(currf, name);
     if (sym &&
         (sym->type->is_basetype && sym->type->btype->dectype == STRUCT)) {
       error(isfield ? 15 : 3, root->lineno);
@@ -175,18 +185,15 @@ static symbol *vardec(ast_node *root, cmm_type *type, int isfield) {
     free(shape);
     dimension[0] = *size; // use dimension[0] as len.
     sym->dimension = dimension;
-    if (isfield)
-      frame_adds(currf, name, sym);
-    else
-      frame_add(currf, name, sym);
   } else {
     sym = make_symbol(
         name, type); // here type can only be btype, int, float, or struct.
-    if (isfield) {   // ! TODO: check redefine
-      frame_adds(currf, name, sym);
-    } else {
-      frame_add(currf, name, sym);
-    }
+  }
+  if (isfield) {
+    // printf("%s->%s\n", sym->name, _struct->btype->struct_name);
+    frame_add(_struct->btype->struct_field, sym->name, sym);
+  } else {
+    frame_add(currf, sym->name, sym);
   }
   return sym;
 }
@@ -236,16 +243,16 @@ static void paramdec(ast_node *root, cmm_type *_v) {
   ast_node *_specifier = get_child_n(root, 0);
   ast_node *_vardec = get_child_n(root, 1);
   if (_specifier) {
-    cmm_type *spec = specifier(_specifier);
+    cmm_type *spec = specifier(_specifier, NULL);
     ctype_add_tail(ctypecpy(spec), _v);
-    vardec(_vardec, spec, 0);
+    vardec(_vardec, spec, 0, NULL);
   }
 }
 
 static void compst(ast_node *root, cmm_type *rtype) {
   ast_node *_deflist = get_child_n(root, 1);
   if (_deflist->symbol == DefList) {
-    deflist(_deflist, 0);
+    deflist(_deflist, 0, NULL);
     ast_node *_stmtlist = get_child_n(root, 2);
     if (_stmtlist->symbol == StmtList) {
       stmtlist(_stmtlist, rtype);
@@ -254,48 +261,48 @@ static void compst(ast_node *root, cmm_type *rtype) {
     stmtlist(_deflist, rtype);
 }
 
-static cmm_type *deflist(ast_node *root, int isfield) {
+static cmm_type *deflist(ast_node *root, int isfield, cmm_type *_struct) {
   if (!root)
     return NULL;
   ast_node *_def = get_child_n(root, 0);
-  ast_node *_deflist = get_child_n(root, 1);
   if (_def) {
-    cmm_type *first = def(_def, isfield);
-    cmm_type *last = deflist(_deflist, isfield);
-    if (last) {
-      ctype_add_tail(last, first);
-    }
-    return first;
+    ast_node *_deflist = get_child_n(root, 1);
+    def(_def, isfield, _struct);
+    deflist(_deflist, isfield, _struct);
   }
   return NULL;
 }
 
-static cmm_type *def(ast_node *root, int isfield) {
+static cmm_type *def(ast_node *root, int isfield, cmm_type *_struct) {
   ast_node *_specifier = get_child_n(root, 0);
   ast_node *_declist = get_child_n(root, 1);
-  cmm_type *spec = specifier(_specifier);
+  cmm_type *spec = specifier(_specifier, _struct);
   if (spec->errcode == NO_ERR) {
-    declist(_declist, spec, isfield);
+    declist(_declist, spec, isfield, _struct);
   } else if (spec->errcode == ERR_UNDEFINE) {
     error(17, _specifier->lineno);
+  } else if (spec->errcode == ERR_REDEFINE) {
+    error(16, _specifier->lineno);
   }
   return spec;
 }
 
-static cmm_type *declist(ast_node *root, cmm_type *spec, int isfield) {
+static cmm_type *declist(ast_node *root, cmm_type *spec, int isfield,
+                         cmm_type *_struct) {
   ast_node *_dec = get_child_n(root, 0);
   ast_node *_declist = get_child_n(root, 2);
-  dec(_dec, spec, isfield);
+  dec(_dec, spec, isfield, _struct);
   if (_declist) {
-    declist(_declist, spec, isfield);
+    declist(_declist, spec, isfield, _struct);
   }
   return spec;
 }
 
-static void dec(ast_node *root, cmm_type *spec, int isfield) {
+static void dec(ast_node *root, cmm_type *spec, int isfield,
+                cmm_type *_struct) {
   ast_node *_vardec = get_child_n(root, 0);
   ast_node *_exp = get_child_n(root, 2);
-  symbol *sym = vardec(_vardec, spec, isfield);
+  symbol *sym = vardec(_vardec, spec, isfield, _struct);
   if (_exp) {
     if (isfield) {
       error(15, _exp->lineno);
@@ -304,14 +311,6 @@ static void dec(ast_node *root, cmm_type *spec, int isfield) {
     if (exptype == NO_ERR && ctypecmp(exptype, sym->type)) {
       error(5, _vardec->lineno);
     }
-  }
-  if (isfield) {
-    spec->btype->struct_name = sym->name;
-  }
-  if (isfield) {
-    frame_adds(currf, sym->name, sym);
-  } else {
-    frame_add(currf, sym->name, sym);
   }
 }
 
@@ -344,7 +343,7 @@ static cmm_type *expr(ast_node *root) { //屎
     cmm_type *etype = expr(_exp);
     ast_node *op = get_child_n(root, 0);
     if (op->symbol == NOT) {
-      if (!etype->is_basetype || etype->btype->dectype != FLOAT) {
+      if (!etype->is_basetype || etype->btype->dectype == FLOAT) {
         error(7, _exp->lineno);
         return new_errtype(ERR_TYPEDISMATCH);
       }
@@ -393,12 +392,12 @@ static cmm_type *expr(ast_node *root) { //屎
             error(1, head->lineno);
             return new_errtype(ERR_UNDEFINE);
           }
-          symbol *field = frame_slookup(currf, n);
+          symbol *field = frame_lookup(sym->type->btype->struct_field, n);
           if (!field) {
             error(14, _id->lineno);
             return new_errtype(ERR_UNDEFINE);
           }
-          return field->type;
+          return ctypecpy(field->type);
           // }
         }
         return h;

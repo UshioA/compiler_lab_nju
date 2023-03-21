@@ -17,8 +17,6 @@ static symbol *_make_symbol(cmm_type *ctype, char *name, int ival, float fval,
       sym->ival = ival;
     } else if (btype->dectype == FLOAT) {
       sym->fval = fval;
-    } else if (btype->dectype == STRUCT) {
-      sym->fields = make_frame(NULL, ftype);
     }
   } else { // only handle array, store dimensions
     sym->dimension = dimension;

@@ -1,12 +1,14 @@
 #ifndef __CMM_TYPE_H__
 #define __CMM_TYPE_H__
 #include "common.h"
+#include "frame.h"
 #include "list.h"
 #include "syntax.tab.h"
 typedef struct base_type {
   int dectype;
   char *struct_name; // if is struct.
-} base_type;         // `Specifier' in Grammar.
+  frame *struct_field;
+} base_type; // `Specifier' in Grammar.
 
 typedef struct cmm_type {
   int is_basetype;
@@ -28,7 +30,6 @@ typedef struct cmm_type {
   } errcode;
   list_entry link;
   union {
-    list_entry *struct_fields; // struct
     list_entry *param_types;   // func
     list_entry *contain_types; // summary dogshit.
   };
@@ -66,5 +67,6 @@ cmm_type *ctypecpy(cmm_type *t);
 int btypecmp(base_type *b1, base_type *b2);
 
 int ctypecmp(cmm_type *c1, cmm_type *c2);
+
 
 #endif

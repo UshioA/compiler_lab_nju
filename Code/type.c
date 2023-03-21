@@ -1,13 +1,18 @@
 #include "type.h"
 #include "ast.h"
 #include "common.h"
+#include "frame.h"
 #include "list.h"
+#include "symtab.h"
 #include "syntax.tab.h"
 
 static base_type *__new_btype(int dectype, char *struct_name) {
   base_type *btype = malloc(sizeof(base_type));
   btype->dectype = dectype;
   btype->struct_name = struct_name;
+  if (btype->dectype == STRUCT) {
+    btype->struct_field = make_frame(NULL, 2);
+  }
   return btype;
 }
 
