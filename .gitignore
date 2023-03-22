@@ -5,5 +5,7 @@
 *.pdf
 test*/
 *.py
+workdir/
+*.sh
 parser
 .vscode/

@@ -6,15 +6,18 @@
 #include "symtab.h"
 #include "syntax.tab.h"
 #include "type.h"
+#include <stdio.h>
 #include <time.h>
 frame *global;
 frame *currf; // this name is bad =)
 
+cmm_type *temphead;
+
 static char *randstr() {
-  char alphabet[28] = "abcdefghijklmnopqrstuvwxyz_";
+  char alphabet[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
   char *target = calloc(9, sizeof(char));
   for (int i = 0; i < 8; ++i) {
-    target[i] = alphabet[rand() % 27];
+    target[i] = alphabet[rand() % strlen(alphabet)];
   }
   return target;
 }
@@ -73,9 +76,8 @@ static void extdef(ast_node *root) {
     cmm_type *paramlist = fundec(ch2, spec);
     if (paramlist->errcode == ERR_REDEFINE) {
       error(4, root->lineno);
-    } else {
-      compst(ch3, spec);
     }
+    compst(ch3, spec);
     exit_scope();
   }
 }
@@ -112,7 +114,11 @@ static cmm_type *structspecifier(ast_node *root, cmm_type *_struct) {
         return new_errtype(ERR_REDEFINE);
     }
     cmm_type *_struct = new_cmm_btype(new_struct_type(_id));
+    init_tempnode();
     cmm_type *struct_fields = deflist(_deflist, 1, _struct);
+    ctype_set_contain_type(_struct, struct_fields);
+    // printf("%s has %d members\n", _struct->btype->struct_name,
+    //        _struct->contain_len);
     symset(currf->stab, _id, make_ssymbol(_id, _struct));
     return _struct;
   } else { // struct tag, meant to get some defined type.
@@ -120,7 +126,7 @@ static cmm_type *structspecifier(ast_node *root, cmm_type *_struct) {
     assert(_id);
     symbol *some_struct = frame_lookup(currf, _id);
     if (some_struct && some_struct->type->btype->dectype == STRUCT) {
-      return some_struct->type;
+      return ctypecpy(some_struct->type);
     }
     return new_errtype(ERR_UNDEFINE);
   }
@@ -179,6 +185,11 @@ static symbol *vardec(ast_node *root, cmm_type *type, int isfield,
     }
   }
   if (*size) { // array
+    // printf("i saw array dimen %d, type is basetype: %d\n", *size,
+    //        type->is_basetype);
+    type->is_basetype = 0;
+    type->ctype = TYPE_ARR;
+    type->contain_len = *size;
     sym = make_asymbol(name, type, shape);
     uint32_t *dimension = malloc(sizeof(uint32_t) * ((*size) + 1));
     memcpy(dimension + 1, shape, *size * sizeof(uint32_t));
@@ -205,9 +216,7 @@ static cmm_type *fundec(ast_node *root, cmm_type *rtype) {
         frame_lookup(currf->parent,
                      _id->value.str_val); // global is guarenteed. but i like to
                                           // write currf->parent =)
-    if (sym) {
-      return new_errtype(ERR_REDEFINE);
-    }
+    symbol *original = sym;
     ast_node *vlist = get_child_n(root, 2);
     cmm_type *ftype = new_cmm_ctype(TYPE_FUNC, rtype->btype);
     cmm_type *_varlist = new_cmm_ctype(-1, rtype->btype);
@@ -215,6 +224,9 @@ static cmm_type *fundec(ast_node *root, cmm_type *rtype) {
     ctype_set_contain_type(ftype, _varlist);
     sym = make_funsymbol(_id->value.str_val, ftype);
     frame_add(currf->parent, sym->name, sym);
+    if (original) {
+      return new_errtype(ERR_REDEFINE);
+    }
     return ftype;
   } else {
     symbol *sym = frame_lookup(currf->parent, _id->value.str_val);
@@ -244,8 +256,10 @@ static void paramdec(ast_node *root, cmm_type *_v) {
   ast_node *_vardec = get_child_n(root, 1);
   if (_specifier) {
     cmm_type *spec = specifier(_specifier, NULL);
-    ctype_add_tail(ctypecpy(spec), _v);
+    // printf("i saw param %s with %d dimensions\n",
+    //        get_symbol_name(spec->btype->dectype), spec->contain_len);
     vardec(_vardec, spec, 0, NULL);
+    ctype_add_tail(ctypecpy(spec), _v);
   }
 }
 
@@ -263,14 +277,16 @@ static void compst(ast_node *root, cmm_type *rtype) {
 
 static cmm_type *deflist(ast_node *root, int isfield, cmm_type *_struct) {
   if (!root)
-    return NULL;
+    return temphead;
   ast_node *_def = get_child_n(root, 0);
   if (_def) {
     ast_node *_deflist = get_child_n(root, 1);
-    def(_def, isfield, _struct);
+    cmm_type *first = def(_def, isfield, _struct);
     deflist(_deflist, isfield, _struct);
+    ctype_add_tail(first, temphead);
+    return temphead;
   }
-  return NULL;
+  return temphead;
 }
 
 static cmm_type *def(ast_node *root, int isfield, cmm_type *_struct) {
@@ -325,6 +341,8 @@ static cmm_type *expr(ast_node *root) { //屎
         error(1, ch->lineno);
         return new_errtype(ERR_UNDEFINE);
       }
+      // printf("i saw name %s, dimension %d\n", sym->name,
+      //        sym->type->contain_len);
       return ctypecpy(sym->type);
     } break;
     case INT:
@@ -361,9 +379,13 @@ static cmm_type *expr(ast_node *root) { //屎
     switch (head->symbol) {
     case ID: { // function call
       symbol *sym = frame_lookup(currf, head->value.str_val);
-      if (!sym) {
-        error(2, head->lineno);
+      if (!sym || sym->type->ctype != TYPE_FUNC) {
+        error(!sym ? 2 : 11, head->lineno);
         return new_errtype(ERR_UNDEFINE);
+      }
+      if (sym->type->contain_len) {
+        error(9, head->lineno);
+        return new_errtype(ERR_TYPEDISMATCH);
       }
       cmm_type *n = new_cmm_btype(sym->type->return_type);
       if (n->btype->dectype == INT || n->btype->dectype == FLOAT) {
@@ -376,38 +398,44 @@ static cmm_type *expr(ast_node *root) { //屎
     } break;
     case Exp: {
       ast_node *ch2 = get_child_n(root, 1);
+      ast_node *_id;
+      char *n = randstr();
       switch (ch2->symbol) {
       case DOT: {
+        symbol *sym = NULL;
         cmm_type *h = expr(head); // struct
         if (h->errcode == NO_ERR) {
-          // if (h->is_left) {
           if (!h->is_basetype || h->btype->dectype != STRUCT) {
             error(13, head->lineno);
             return new_errtype(ERR_TYPEDISMATCH);
           }
-          ast_node *_id = get_child_last(root); // struct._id
-          char *n = _id->value.str_val;
-          symbol *sym = frame_lookup(currf, h->btype->struct_name);
-          if (!sym) {
-            error(1, head->lineno);
-            return new_errtype(ERR_UNDEFINE);
-          }
-          symbol *field = frame_lookup(sym->type->btype->struct_field, n);
-          if (!field) {
-            error(14, _id->lineno);
-            return new_errtype(ERR_UNDEFINE);
-          }
-          return ctypecpy(field->type);
-          // }
         }
+        _id = get_child_last(root); // struct._id
+        n = _id->value.str_val;
+        sym = frame_lookup(currf, h->btype->struct_name);
+        if (!sym) {
+          if (h->errcode == NO_ERR)
+            error(1, head->lineno);
+          return new_errtype(ERR_UNDEFINE);
+        }
+        symbol *field = frame_lookup(sym->type->btype->struct_field, n);
+        if (!field) {
+          error(14, _id->lineno);
+          return new_errtype(ERR_UNDEFINE);
+        }
+
+        return ctypecpy(field->type);
+        // }
+
         return h;
       } break;
       case AND:
       case OR: {
         ast_node *exp1 = get_child_n(root, 0);
-        ast_node *exp2 = get_child_last(root);
+        ast_node *exp2 = get_child_n(root, 2);
         cmm_type *et1 = expr(exp1);
         cmm_type *et2 = expr(exp2);
+        // printf("at lineno %d\n", exp2->lineno);
         if (et1->errcode == NO_ERR && et2->errcode == NO_ERR) {
           if (!et1->is_basetype || !et2->is_basetype)
             return new_errtype(ERR_TYPEDISMATCH);
@@ -423,12 +451,17 @@ static cmm_type *expr(ast_node *root) { //屎
         ast_node *e1 = get_child_n(root, 0);
         ast_node *e2 = get_child_n(root, 2);
         cmm_type *t1 = expr(e1);
-        cmm_type *t2 = expr(e2);
+        if (t1->errcode != NO_ERR)
+          return t1;
         if (!t1->is_left) {
           error(6, e1->lineno);
           return new_errtype(ERR_TYPEDISMATCH);
         }
+        cmm_type *t2 = expr(e2);
         if (ctypecmp(t1, t2)) {
+          printf("%d%s %d%s\n", t1->errcode,
+                 get_symbol_name(t1->btype->dectype), t2->errcode,
+                 get_symbol_name(t2->btype->dectype));
           error(5, ch2->lineno);
           return new_errtype(ERR_TYPEDISMATCH);
         }
@@ -455,7 +488,9 @@ static cmm_type *expr(ast_node *root) { //屎
             return new_errtype(ERR_TYPEDISMATCH);
           }
         }
-        return ctypecpy(et1);
+        if (et1->errcode != NO_ERR)
+          return ctypecpy(et1);
+        return ctypecpy(et2);
       } break;
       default:
         assert(0);
@@ -468,19 +503,23 @@ static cmm_type *expr(ast_node *root) { //屎
     if (head->symbol == ID) {
       ast_node *_args = get_child_n(root, 2);
       symbol *fsym = frame_lookup(currf, head->value.str_val);
-      if (!fsym) {
-        error(2, head->lineno);
+      if (!fsym || fsym->type->ctype != TYPE_FUNC) {
+        error(!fsym ? 2 : 11, head->lineno);
         return new_errtype(ERR_UNDEFINE);
       }
       if (fsym->type->is_basetype || fsym->type->ctype != TYPE_FUNC) {
         error(11, head->lineno);
         return new_errtype(ERR_TYPEDISMATCH);
       }
-      args(_args, fsym->type);
+      cmm_type *iferr = args(_args, fsym->type);
+      if (iferr->errcode != NO_ERR) {
+        error(9, _args->lineno);
+      }
       cmm_type *n = new_cmm_btype(fsym->type->return_type);
       if (n->btype->dectype == INT || n->btype->dectype == FLOAT) {
         n->is_left = 0;
       }
+      n->errcode = iferr->errcode;
       return n;
     } else if (head->symbol == Exp) {
       cmm_type *atype = expr(head);
@@ -496,7 +535,17 @@ static cmm_type *expr(ast_node *root) { //屎
         error(12, index->lineno);
         return new_errtype(ERR_TYPEDISMATCH);
       }
-      return new_cmm_btype(atype->btype);
+      cmm_type *c;
+      if (atype->contain_len > 1) {
+        c = new_cmm_ctype(TYPE_ARR, atype->btype);
+        c->contain_len = atype->contain_len - 1;
+        c->errcode =
+            atype->errcode != NO_ERR ? atype->errcode : _index->errcode;
+        return c;
+      }
+      c = new_cmm_btype(atype->btype);
+      c->errcode = atype->errcode != NO_ERR ? atype->errcode : _index->errcode;
+      return c;
     } else
       assert(0);
   } break;
@@ -519,20 +568,23 @@ static cmm_type *args_ass(ast_node *root, cmm_type *paramtypes) {
   ast_node *e1 = get_child_n(root, 0);
   ast_node *args = get_child_n(root, 2);
   cmm_type *t1 = expr(e1);
-  ctype_add_tail(ctypecpy(t1), paramtypes);
+  cmm_type *v = ctypecpy(t1);
+  ctype_add_tail(v, paramtypes);
   if (args) {
     return args_ass(args, paramtypes);
   }
   return paramtypes;
 }
-static void args(ast_node *root, cmm_type *functype) {
+static cmm_type *args(ast_node *root, cmm_type *functype) {
   cmm_type *atype = new_cmm_ctype(-1, new_literal(INT));
   atype = args_ass(root, atype);
   cmm_type *wrapper = new_cmm_ctype(TYPE_FUNC, functype->return_type);
   ctype_set_contain_type(wrapper, atype);
   if (ctypecmp(wrapper, functype)) {
-    error(9, root->lineno);
+    return new_errtype(ERR_TYPEDISMATCH);
+    // error(9, root->lineno);
   }
+  return functype;
 }
 
 static void stmtlist(ast_node *root, cmm_type *rtype) {

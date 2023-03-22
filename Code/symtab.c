@@ -53,11 +53,13 @@ symbol *make_isymbol(char *name, uint32_t ival) {
   return _make_symbol(new_cmm_btype(new_literal(INT)), name, ival, 0, NULL, -1);
 }
 symbol *make_fsymbol(char *name, float fval) {
-  return _make_symbol(new_cmm_btype(new_literal(FLOAT)), name, 0, fval, NULL, -1);
+  return _make_symbol(new_cmm_btype(new_literal(FLOAT)), name, 0, fval, NULL,
+                      -1);
 }
 symbol *make_asymbol(char *name, cmm_type *basetype, uint32_t *dimension) {
-  return _make_symbol(new_cmm_ctype(TYPE_ARR, basetype->btype), name, 0, 0,
-                      dimension, -1);
+  cmm_type *some = new_cmm_ctype(TYPE_ARR, basetype->btype);
+  some->contain_len = basetype->contain_len;
+  return _make_symbol(some, name, 0, 0, dimension, -1);
 }
 symbol *make_ssymbol(char *name, cmm_type *ctype) {
   return _make_symbol(ctype, name, 0, 0, 0, 2);

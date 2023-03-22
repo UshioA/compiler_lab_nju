@@ -27,9 +27,12 @@ typedef struct cmm_type {
     ERR_UNDEFINE,
     ERR_REDEFINE,
     ERR_TYPEDISMATCH,
+    ERR_PARAMDISMATCH,
+    ERR_INDEXDISMATCH,
   } errcode;
   list_entry link;
   union {
+    list_entry *struct_type;
     list_entry *param_types;   // func
     list_entry *contain_types; // summary dogshit.
   };
@@ -67,6 +70,5 @@ cmm_type *ctypecpy(cmm_type *t);
 int btypecmp(base_type *b1, base_type *b2);
 
 int ctypecmp(cmm_type *c1, cmm_type *c2);
-
 
 #endif

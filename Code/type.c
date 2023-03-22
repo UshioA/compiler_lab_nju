@@ -35,9 +35,10 @@ cmm_type *__new_cmm_type(int is_basetype, int ctype, base_type *return_type,
     c->return_type = return_type;
   }
   list_init(&c->link);
-  c->contain_len = -1;
+  c->contain_len = 0;
   c->errcode = NO_ERR;
   c->is_left = 1;
+  c->contain_types = NULL;
   return c;
 }
 
@@ -59,7 +60,6 @@ int cmm_compute_len(cmm_type *ptr) {
   if (head) {
     for (pos = head->next; pos != head; pos = pos->next) {
       ++cnt;
-      assert(cnt <= 10);
     }
   }
   ptr->contain_len = cnt;
@@ -93,7 +93,11 @@ void ctype_set_contain_type(cmm_type *head, cmm_type *contain) {
 }
 
 cmm_type *ctypecpy(cmm_type *t) {
-  return __new_cmm_type(t->is_basetype, t->ctype, t->return_type, t->btype);
+  cmm_type *some =
+      __new_cmm_type(t->is_basetype, t->ctype, t->return_type, t->btype);
+  some->contain_len = t->contain_len;
+  some->errcode = t->errcode;
+  return some;
 }
 
 /**
@@ -112,8 +116,9 @@ int btypecmp(base_type *b1, base_type *b2) {
  * @brief like strcmp, but compare cmm_type*
  */
 int ctypecmp(cmm_type *c1, cmm_type *c2) {
-  if (c1->errcode != NO_ERR || c2->errcode != NO_ERR)
+  if (c1->errcode != NO_ERR || c2->errcode != NO_ERR) {
     return 0;
+  }
   if (c1->is_basetype && c2->is_basetype) {
     return btypecmp(c1->btype, c2->btype);
   }
@@ -135,8 +140,9 @@ int ctypecmp(cmm_type *c1, cmm_type *c2) {
       list_entry *p2head = c2->contain_types;
       cmm_type *p2 = le2(cmm_type, p2head->next, link);
       list_for_each_item(pos, head, link) {
-        if (ctypecmp(pos, p2))
+        if (ctypecmp(pos, p2)) {
           return 1;
+        }
         p2 = le2(cmm_type, p2->link.next, link);
       }
       return 0;
