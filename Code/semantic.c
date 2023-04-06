@@ -473,6 +473,10 @@ static cmm_type *expr(ast_node *root) { //屎
             error(7, exp1->lpeer->lineno);
             return new_errtype(ERR_TYPEDISMATCH);
           }
+          if(ch2->symbol==RELOP){
+            return new_cmm_btype(new_literal(INT));
+          }
+          return ctypecpy(et1);
         }
         if (et1->errcode != NO_ERR)
           return ctypecpy(et1);
