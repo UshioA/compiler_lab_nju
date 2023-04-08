@@ -104,24 +104,28 @@ static cmm_type *structspecifier(ast_node *root, cmm_type *_struct) {
       _deflist = get_child_n(root, 2);
       _id = randstr();
     }
-    symbol *some_struct = frame_local_lookup(currf, _id);
+    symbol *some_struct = frame_lookup(global, _id);
     if (some_struct) // already defined.
       return new_errtype(ERR_REDEFINE);
     if (_struct) {
       some_struct = frame_local_lookup(_struct->btype->struct_field, _id);
       if (some_struct) // already defined.
         return new_errtype(ERR_REDEFINE);
+      some_struct = frame_lookup(global, _id); // struct is global;
+      if (some_struct)
+        return new_errtype(ERR_REDEFINE);
     }
     cmm_type *_struct = new_cmm_btype(new_struct_type(_id));
+    symset(global->stab, _id, make_ssymbol(_id, _struct)); // for type checking.
     init_tempnode();
     cmm_type *struct_fields = deflist(_deflist, 1, _struct);
     ctype_set_contain_type(_struct, struct_fields);
-    symset(currf->stab, _id, make_ssymbol(_id, _struct));
+    symset(global->stab, _id, make_ssymbol(_id, _struct));
     return _struct;
   } else { // struct tag, meant to get some defined type.
     char *_id = opttag(get_child_n(root, 1)); // i am too lazy.
     assert(_id);
-    symbol *some_struct = frame_lookup(currf, _id);
+    symbol *some_struct = frame_lookup(global, _id);
     if (some_struct && some_struct->type->btype->dectype == STRUCT) {
       return ctypecpy(some_struct->type);
     }
@@ -473,7 +477,7 @@ static cmm_type *expr(ast_node *root) { //屎
             error(7, exp1->lpeer->lineno);
             return new_errtype(ERR_TYPEDISMATCH);
           }
-          if(ch2->symbol==RELOP){
+          if (ch2->symbol == RELOP) {
             return new_cmm_btype(new_literal(INT));
           }
           return ctypecpy(et1);
