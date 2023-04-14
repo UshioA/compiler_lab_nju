@@ -6,9 +6,9 @@
 #include "type.h"
 #include <stdint.h>
 
-#define __CMM_HASH_SIZE_LARGE__ 0xffff
-#define __CMM_HASH_SIZE_NORMAL__ 0xfff
-#define __CMM_HASH_SIZE_SMALL__ 0x3ff
+#define __CMM_HASH_SIZE_LARGE__ 0xfff
+#define __CMM_HASH_SIZE_NORMAL__ 0x3ff
+#define __CMM_HASH_SIZE_SMALL__ 0xff
 
 typedef struct symbol { // variable, function, array, struct
   cmm_type *type;

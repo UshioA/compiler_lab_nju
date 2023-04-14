@@ -133,5 +133,5 @@ intercode *new_write_ir(operand *from);
 
 void ir_pushback(intercode *);
 
-void repr(intercode *p, FILE *f);
+void ir_dump(intercode *p, FILE *f);
 #endif
