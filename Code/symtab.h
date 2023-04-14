@@ -43,6 +43,12 @@ typedef struct symtab_entry {
   int isfield;
   list_entry link;
 } sentry;
+
+typedef struct symtab {
+  sentry **head;
+  uint32_t hsize;
+} symtab;
+
 static symbol *_make_symbol(cmm_type *ctype, char *name, int ival, float fval,
                             uint32_t *dimension, int ftype);
 
@@ -55,10 +61,6 @@ symbol *make_funsymbol(char *name, cmm_type *ctype);
 int symbol_isbtype(symbol *s);
 sentry *make_sentry(symbol *);
 
-typedef struct symtab {
-  sentry **head;
-  uint32_t hsize;
-} symtab;
 
 symbol *symget(symtab *stab, char *name);
 void symset(symtab *stab, char *name, symbol *sym);

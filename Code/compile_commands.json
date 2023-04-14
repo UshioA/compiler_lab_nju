@@ -1,0 +1,14 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "./syntax.tab.o",
+      "./syntax.tab.c"
+    ],
+    "directory": "/home/kirisame/Lab/Code",
+    "file": "/home/kirisame/Lab/Code/syntax.tab.c",
+    "output": "/home/kirisame/Lab/Code/syntax.tab.o"
+  }
+]

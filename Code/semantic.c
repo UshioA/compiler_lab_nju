@@ -136,7 +136,7 @@ static cmm_type *structspecifier(ast_node *root, cmm_type *_struct) {
 static void extdeclist(ast_node *root, cmm_type *spec) {
   ast_node *_vardec = get_child_n(root, 0);
   ast_node *_extdeclist = get_child_n(root, 2);
-  vardec(_vardec, spec, 0, NULL);
+  vardec(_vardec, ctypecpy(spec), 0, NULL);
   if (_extdeclist) {
     extdeclist(_extdeclist, spec);
   }
@@ -211,7 +211,7 @@ static cmm_type *fundec(ast_node *root, cmm_type *rtype) {
   ast_node *_id = get_child_n(root, 0);
   if (root->childnum == 4) {
     symbol *sym =
-        frame_lookup(currf->parent,
+        frame_lookup(currf,
                      _id->value.str_val); // global is guarenteed. but i like to
                                           // write currf->parent =)
     symbol *original = sym;
@@ -221,20 +221,20 @@ static cmm_type *fundec(ast_node *root, cmm_type *rtype) {
     varlist(vlist, _varlist);
     ctype_set_contain_type(ftype, _varlist);
     sym = make_funsymbol(_id->value.str_val, ftype);
-    frame_add(currf->parent, sym->name, sym);
+    frame_add(currf, sym->name, sym);
     if (original) {
       return new_errtype(ERR_REDEFINE);
     }
     return ftype;
   } else {
-    symbol *sym = frame_lookup(currf->parent, _id->value.str_val);
+    symbol *sym = frame_lookup(currf, _id->value.str_val);
     if (sym) {
       return new_errtype(ERR_REDEFINE);
     }
     cmm_type *ftype = new_cmm_ctype(TYPE_FUNC, rtype->btype);
     sym = make_funsymbol(_id->value.str_val, ftype);
     cmm_compute_len(ftype);
-    frame_add(currf->parent, sym->name, sym);
+    frame_add(currf, sym->name, sym);
     return ftype;
   }
 }
@@ -303,7 +303,7 @@ static cmm_type *declist(ast_node *root, cmm_type *spec, int isfield,
                          cmm_type *_struct) {
   ast_node *_dec = get_child_n(root, 0);
   ast_node *_declist = get_child_n(root, 2);
-  dec(_dec, spec, isfield, _struct);
+  dec(_dec, ctypecpy(spec), isfield, _struct);
   if (_declist) {
     declist(_declist, spec, isfield, _struct);
   }

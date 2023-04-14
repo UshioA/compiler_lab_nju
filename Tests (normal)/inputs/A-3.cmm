@@ -1,9 +1,0 @@
-struct Person {
-  int x;
-  int y;
-};
-
-int main() {
-  Person person;
-  int a = person.x + 1;
-}
