@@ -27,7 +27,7 @@ const char *get_symbol_name(int id) {
 }
 
 ast_node *make_ast_node(int sy, int isterminal, ast_value value) {
-  ast_node *a = (void *)malloc(sizeof(ast_node));
+  ast_node *a = calloc(1, sizeof(ast_node));
   a->lineno = yylloc.first_line;
   a->column = yylloc.first_column;
   a->symbol = sy;

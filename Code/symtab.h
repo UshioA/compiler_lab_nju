@@ -18,6 +18,7 @@ typedef struct symbol { // variable, function, array, struct
     float fval;          // float type
     uint32_t *dimension; // use dimension[0] as len.
   };
+  int is_arg;
 } symbol;
 
 static inline uint32_t __fnv_hash(char *str, uint32_t length) {
@@ -60,7 +61,6 @@ symbol *make_ssymbol(char *name, cmm_type *ctype);
 symbol *make_funsymbol(char *name, cmm_type *ctype);
 int symbol_isbtype(symbol *s);
 sentry *make_sentry(symbol *);
-
 
 symbol *symget(symtab *stab, char *name);
 void symset(symtab *stab, char *name, symbol *sym);

@@ -6,6 +6,7 @@
 #include "symtab.h"
 #include "syntax.tab.h"
 #include "type.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <time.h>
 frame *global;
@@ -171,7 +172,6 @@ static symbol *vardec(ast_node *root, cmm_type *type, int isfield,
   *capacity = 16;
   *size = 0;
   uint32_t *shape = calloc(*capacity, sizeof(uint32_t));
-  memset(shape, 0, *capacity * sizeof(uint32_t));
   char *name = vardec_ass(ch1, &shape, size, capacity);
   symbol *sym = isfield ? frame_local_lookup(_struct->btype->struct_field, name)
                         : symget(currf->stab, name);
@@ -189,6 +189,9 @@ static symbol *vardec(ast_node *root, cmm_type *type, int isfield,
     type->is_basetype = 0;
     type->ctype = TYPE_ARR;
     type->contain_len = *size;
+    type->dimensions = calloc(*size + 1, sizeof(uint32_t));
+    memcpy(type->dimensions + 1, shape, *size * sizeof(uint32_t));
+    type->dimensions[0] = *size;
     sym = make_asymbol(name, type, shape);
     uint32_t *dimension = malloc(sizeof(uint32_t) * ((*size) + 1));
     memcpy(dimension + 1, shape, *size * sizeof(uint32_t));
@@ -417,11 +420,7 @@ static cmm_type *expr(ast_node *root) { //屎
           error(14, _id->lineno);
           return new_errtype(ERR_UNDEFINE);
         }
-
         return ctypecpy(field->type);
-        // }
-
-        return h;
       } break;
       case AND:
       case OR: {
@@ -523,6 +522,7 @@ static cmm_type *expr(ast_node *root) { //屎
         return new_errtype(ERR_TYPEDISMATCH);
       }
       ast_node *index = get_child_n(root, 2);
+      index->arrtype = atype;
       cmm_type *_index = expr(index);
       if (_index->errcode == NO_ERR &&
           (!_index->is_basetype || _index->btype->dectype != INT)) {
@@ -533,6 +533,10 @@ static cmm_type *expr(ast_node *root) { //屎
       if (atype->contain_len > 1) {
         c = new_cmm_ctype(TYPE_ARR, atype->btype);
         c->contain_len = atype->contain_len - 1;
+        c->dimensions = calloc(c->contain_len + 1, sizeof(uint32_t));
+        c->dimensions[0] = c->contain_len;
+        memcpy(c->dimensions + 1, atype->dimensions + 1,
+               c->contain_len * sizeof(uint32_t));
         c->errcode =
             atype->errcode != NO_ERR ? atype->errcode : _index->errcode;
         return c;
@@ -560,11 +564,13 @@ static char *opttag(ast_node *root) {
 
 static cmm_type *args_ass(ast_node *root, cmm_type *paramtypes) {
   ast_node *e1 = get_child_n(root, 0);
+  e1->isarg = 1;
   ast_node *args = get_child_n(root, 2);
   cmm_type *t1 = expr(e1);
   cmm_type *v = ctypecpy(t1);
   ctype_add_tail(v, paramtypes);
   if (args) {
+    args->isarg = 1;
     return args_ass(args, paramtypes);
   }
   return paramtypes;

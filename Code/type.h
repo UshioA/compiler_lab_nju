@@ -37,6 +37,7 @@ typedef struct cmm_type {
     list_entry *contain_types; // summary dogshit.
   };
   int contain_len;
+  uint32_t *dimensions;
   int is_left;
 } cmm_type;
 

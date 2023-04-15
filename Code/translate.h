@@ -24,10 +24,14 @@ void translate_fundec(ast_node *root);
 void translate_compst(ast_node *root);
 void translate_varlist(ast_node *root);
 void translate_paramdec(ast_node *root);
-symbol* translate_vardec(ast_node *root, int isfunc);
+symbol *translate_vardec(ast_node *root, int isfunc);
 void translate_deflist(ast_node *root);
 void translate_def(ast_node *root);
 void translate_declist(ast_node *root);
 void translate_dec(ast_node *root);
-
+void translate_expr(ast_node *root, operand *);
+void translate_cond(ast_node *exp, operand *label_true, operand *label_false,
+                    int cond);
+void translate_args(ast_node *root, operand **arg_list, int index);
+void translate_stmtlist(ast_node *root);
 #endif

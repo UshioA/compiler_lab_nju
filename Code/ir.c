@@ -35,10 +35,10 @@ operand *new_var(char *varname) { return new_v(OPR_VAR, -1, varname); }
 operand *new_size(int size) { return new_v(OPR_SIZE, size, NULL); }
 operand *new_func(char *funcname) { return new_v(OPR_FUNC, -1, funcname); }
 
-intercode *new_label_ir() {
+intercode *new_label_ir(operand *label) {
   intercode *ir = new_ir();
   ir->kind = IR_LABEL;
-  ir->label.label = new_label();
+  ir->label.label = label;
   return ir;
 }
 intercode *new_func_ir(operand *funcname) {
@@ -159,6 +159,11 @@ intercode *new_write_ir(operand *from) {
 void ir_pushback(intercode *p) { list_add_tail(&p->link, &ircode->link); }
 
 static void op_dump(operand *op, FILE *f) {
+  if (op->ref) {
+    fprintf(f, "&");
+  } else if (op->deref) {
+    fprintf(f, "*");
+  }
   switch (op->kind) {
   case OPR_TMP: {
     fprintf(f, "t%d", op->tempno);

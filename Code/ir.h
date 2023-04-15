@@ -116,7 +116,7 @@ operand *new_var(char *varname);
 operand *new_size(int size);
 operand *new_func(char *funcname);
 
-intercode *new_label_ir();
+intercode *new_label_ir(operand* label);
 intercode *new_func_ir(operand *funcname);
 intercode *new_assign_ir(operand *lhs, operand *rhs);
 intercode *new_arith_ir(int kind, operand *src1, operand *src2, operand *dest);

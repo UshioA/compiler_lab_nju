@@ -8,7 +8,7 @@
 
 static symbol *_make_symbol(cmm_type *ctype, char *name, int ival, float fval,
                             uint32_t *dimension, int ftype) {
-  symbol *sym = malloc(sizeof(symbol));
+  symbol *sym = calloc(1, sizeof(symbol));
   sym->name = name;
   sym->type = ctype;
   if (ctype->is_basetype) {
@@ -59,6 +59,7 @@ symbol *make_fsymbol(char *name, float fval) {
 symbol *make_asymbol(char *name, cmm_type *basetype, uint32_t *dimension) {
   cmm_type *some = new_cmm_ctype(TYPE_ARR, basetype->btype);
   some->contain_len = basetype->contain_len;
+  some->dimensions = basetype->dimensions;
   return _make_symbol(some, name, 0, 0, dimension, -1);
 }
 symbol *make_ssymbol(char *name, cmm_type *ctype) {

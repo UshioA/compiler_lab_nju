@@ -25,7 +25,7 @@ base_type *new_struct_type(char *struct_name) {
 
 cmm_type *__new_cmm_type(int is_basetype, int ctype, base_type *return_type,
                          base_type *btype) {
-  cmm_type *c = malloc(sizeof(cmm_type));
+  cmm_type *c = calloc(1, sizeof(cmm_type));
   c->is_basetype = is_basetype;
   c->ctype = ctype;
   if (is_basetype) {
@@ -103,10 +103,11 @@ static base_type *btypecpy(base_type *b) {
 }
 
 cmm_type *ctypecpy(cmm_type *t) {
-  cmm_type *some = __new_cmm_type(t->is_basetype, t->ctype,
-                                  t->return_type, t->btype);
+  cmm_type *some =
+      __new_cmm_type(t->is_basetype, t->ctype, t->return_type, t->btype);
   some->contain_len = t->contain_len;
   some->errcode = t->errcode;
+  some->dimensions = t->dimensions;
   return some;
 }
 
