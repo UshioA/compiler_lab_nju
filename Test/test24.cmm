@@ -1,6 +1,0 @@
-struct A{
-  struct A{
-    int b;
-    float A;
-  }A;
-};

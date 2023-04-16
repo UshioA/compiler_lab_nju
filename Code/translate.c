@@ -15,6 +15,11 @@ static const char *trans_error =
 
 FILE *f;
 
+void init_translate(FILE *_f) {
+  init_file(_f);
+  init_ircode();
+}
+
 static void translate_error() {
   fputs(trans_error, stderr);
   exit(0);
@@ -27,7 +32,7 @@ void init_file(FILE *_f) { f = _f; }
 void emit_code(intercode *ir) { ir_pushback(ir); }
 
 void dump_code() {
-  intercode *pos = calloc(1, sizeof(intercode));
+  intercode *pos;
   list_entry *head = &ircode->link;
   list_for_each_item(pos, head, link) { ir_dump(pos, f); }
 }
@@ -39,10 +44,10 @@ void translate_program(ast_node *root) {
 }
 
 void translate_extdeflist(ast_node *root) {
-  if (root->childnum == 2) {
-    translate_extdef(get_child_n(root, 0));
-    translate_extdeflist(get_child_n(root, 1));
-  }
+  if (!root)
+    return;
+  translate_extdef(get_child_n(root, 0));
+  translate_extdeflist(get_child_n(root, 1));
 }
 
 void translate_extdef(ast_node *root) {
@@ -60,15 +65,22 @@ void translate_extdef(ast_node *root) {
 
 void translate_fundec(ast_node *root) {
   intercode *fun = new_func_ir(new_func(root->child->value.str_val));
-  ir_pushback(fun);
+  emit_code(fun);
   if (root->childnum == 4) {
     translate_varlist(get_child_n(root, 2));
   }
 }
 
 void translate_compst(ast_node *root) {
-  translate_deflist(get_child_n(root, 1));
-  translate_stmtlist(get_child_n(root, 2));
+  ast_node *_deflist = get_child_n(root, 1);
+  if (_deflist->symbol == DefList) {
+    translate_deflist(_deflist);
+    ast_node *_stmtlist = get_child_n(root, 2);
+    if (_stmtlist->symbol == StmtList) {
+      translate_stmtlist(_stmtlist);
+    }
+  } else if (_deflist->symbol == StmtList)
+    translate_stmtlist(_deflist);
 }
 
 void translate_varlist(ast_node *root) {
@@ -89,7 +101,7 @@ symbol *translate_vardec(ast_node *root, int isfunc) {
       translate_error();
     if (isfunc) {
       intercode *ir = new_param_ir(new_var(sym->name));
-      ir_pushback(ir);
+      emit_code(ir);
     } else {
       if (sym->type->ctype == TYPE_ARR) {
         int sz = 0;
@@ -97,7 +109,7 @@ symbol *translate_vardec(ast_node *root, int isfunc) {
           sz += sym->dimension[i];
         }
         intercode *dec = new_dec_ir(new_var(sym->name), new_size(sz));
-        ir_pushback(dec);
+        emit_code(dec);
       }
     }
     return sym;
@@ -107,6 +119,8 @@ symbol *translate_vardec(ast_node *root, int isfunc) {
 }
 
 void translate_deflist(ast_node *root) {
+  if (!root)
+    return;
   if (root->childnum == 2) {
     translate_def(get_child_n(root, 0));
     translate_deflist(get_child_n(root, 1));
@@ -133,7 +147,7 @@ void translate_dec(ast_node *root) {
     operand *tmp = new_tempvar();
     translate_expr(get_child_n(root, 2), tmp);
     intercode *assign = new_assign_ir(new_var(sym->name), tmp);
-    ir_pushback(assign);
+    emit_code(assign);
   }
 }
 
@@ -197,11 +211,11 @@ static int get_cond(ast_node *root) {
 
 static void handle_cond(ast_node *exp, operand *place) {
   operand *label1 = new_label(), *label2 = new_label();
-  ir_pushback(new_assign_ir(place, new_imm(0)));
+  emit_code(new_assign_ir(place, new_imm(0)));
   translate_cond(exp, label1, label2, get_cond(exp));
-  ir_pushback(new_label_ir(label1));
-  ir_pushback(new_assign_ir(place, new_imm(1)));
-  ir_pushback(new_label_ir(label2));
+  emit_code(new_label_ir(label1));
+  emit_code(new_assign_ir(place, new_imm(1)));
+  emit_code(new_label_ir(label2));
 }
 
 void translate_cond(ast_node *exp, operand *label_true, operand *label_false,
@@ -212,8 +226,8 @@ void translate_cond(ast_node *exp, operand *label_true, operand *label_false,
     translate_expr(get_child_n(exp, 0), t1);
     translate_expr(get_child_n(exp, 2), t2);
     char *op = get_child_n(exp, 1)->value.str_val;
-    ir_pushback(new_ifgoto_ir(op, t1, t2, label_true));
-    ir_pushback(new_goto_ir(label_false));
+    emit_code(new_ifgoto_ir(op, t1, t2, label_true));
+    emit_code(new_goto_ir(label_false));
   } break;
   case COND_NOT: {
     translate_cond(get_child_last(exp), label_false, label_true,
@@ -224,7 +238,7 @@ void translate_cond(ast_node *exp, operand *label_true, operand *label_false,
     ast_node *exp1 = get_child_n(exp, 0);
     ast_node *exp2 = get_child_n(exp, 2);
     translate_cond(exp1, label1, label_false, get_cond(exp1));
-    ir_pushback(new_label_ir(label1));
+    emit_code(new_label_ir(label1));
     translate_cond(exp2, label_true, label_false, get_cond(exp2));
   } break;
   case COND_OR: {
@@ -232,14 +246,14 @@ void translate_cond(ast_node *exp, operand *label_true, operand *label_false,
     ast_node *exp1 = get_child_n(exp, 0);
     ast_node *exp2 = get_child_n(exp, 2);
     translate_cond(exp1, label_true, label1, get_cond(exp1));
-    ir_pushback(new_label_ir(label1));
+    emit_code(new_label_ir(label1));
     translate_cond(exp2, label_true, label_false, get_cond(exp2));
   } break;
   case COND_OTHER: {
     operand *t1 = new_tempvar();
     translate_expr(exp, t1);
-    ir_pushback(new_ifgoto_ir("!=", t1, new_imm(0), label_true));
-    ir_pushback(new_goto_ir(label_false));
+    emit_code(new_ifgoto_ir("!=", t1, new_imm(0), label_true));
+    emit_code(new_goto_ir(label_false));
   } break;
   }
 }
@@ -258,12 +272,12 @@ void translate_expr(ast_node *root, operand *tmp) {
         op->ref = 1;
       }
       intercode *id = new_assign_ir(tmp, op);
-      ir_pushback(id);
+      emit_code(id);
     } break;
     case INT: {
       int v = ch->value.int_val;
       intercode *integer = new_assign_ir(tmp, new_imm(v));
-      ir_pushback(integer);
+      emit_code(integer);
     } break;
     case FLOAT: {
       fprintf(stderr, "对不起, 建议你玩原神\n");
@@ -280,7 +294,7 @@ void translate_expr(ast_node *root, operand *tmp) {
       ast_node *exp = get_child_last(root);
       translate_expr(exp, t1);
       intercode *minus = new_arith_ir(MINUS, new_imm(0), t1, tmp);
-      ir_pushback(minus);
+      emit_code(minus);
     } else if (op->symbol == NOT) {
       handle_cond(root, tmp);
     } else
@@ -292,9 +306,9 @@ void translate_expr(ast_node *root, operand *tmp) {
     case ID: { // function call
       symbol *sym = frame_lookup(global, head->value.str_val);
       if (!strcmp(sym->name, "read")) {
-        ir_pushback(new_read_ir(tmp));
+        emit_code(new_read_ir(tmp));
       } else {
-        ir_pushback(new_call_ir(new_func(sym->name), tmp));
+        emit_code(new_call_ir(new_func(sym->name), tmp));
       }
     } break;
     case LP: { // bullshit =)
@@ -316,8 +330,8 @@ void translate_expr(ast_node *root, operand *tmp) {
           operand *t1 = new_tempvar();
           translate_expr(get_child_n(root, 2), t1);
           operand *var = new_var(sym->name);
-          ir_pushback(new_assign_ir(var, t1));
-          ir_pushback(new_assign_ir(tmp, var));
+          emit_code(new_assign_ir(var, t1));
+          emit_code(new_assign_ir(tmp, var));
         } else
           translate_error(); // TODO
       } break;
@@ -331,7 +345,7 @@ void translate_expr(ast_node *root, operand *tmp) {
         operand *t1 = new_tempvar(), *t2 = new_tempvar();
         translate_expr(head, t1);
         translate_expr(get_child_last(root), t2);
-        ir_pushback(new_arith_ir(ch2->symbol, t1, t2, tmp));
+        emit_code(new_arith_ir(ch2->symbol, t1, t2, tmp));
       } break;
       default:
         assert(0);
@@ -346,13 +360,13 @@ void translate_expr(ast_node *root, operand *tmp) {
       operand **arglist = calloc(sym->type->contain_len, sizeof(operand));
       translate_args(get_child_n(root, 2), arglist, sym->type->contain_len - 1);
       if (!strcmp(sym->name, "write")) {
-        ir_pushback(new_write_ir(arglist[0]));
-        ir_pushback(new_assign_ir(tmp, new_imm(0)));
+        emit_code(new_write_ir(arglist[0]));
+        emit_code(new_assign_ir(tmp, new_imm(0)));
       } else {
         for (int i = 0; i < sym->type->contain_len; ++i) {
-          ir_pushback(new_arg_ir(arglist[i]));
+          emit_code(new_arg_ir(arglist[i]));
         }
-        ir_pushback(new_call_ir(new_func(sym->name), tmp));
+        emit_code(new_call_ir(new_func(sym->name), tmp));
       }
     } else if (head->symbol == Exp) {
 
@@ -374,6 +388,56 @@ void translate_args(ast_node *root, operand **arg_list, int index) {
     assert(root->childnum == 1);
 }
 
-void translate_stmtlist(ast_node* root){
-  assert(0);
+void translate_stmtlist(ast_node *root) {
+  if (!root)
+    return;
+  ast_node *stmt = get_child_n(root, 0);
+  ast_node *stmtl = get_child_n(root, 1);
+  translate_stmt(stmt);
+  translate_stmtlist(stmtl);
+}
+
+void translate_stmt(ast_node *root) {
+  if (!root)
+    return;
+  ast_node *head = get_child_n(root, 0);
+  switch (head->symbol) {
+  case Exp: {
+    operand *tmp = new_tempvar();
+    translate_expr(head, tmp);
+  } break;
+  case CompSt: {
+    translate_compst(head);
+  } break;
+  case RETURN: {
+    operand *t1 = new_tempvar();
+    translate_expr(get_child_n(root, 1), t1);
+    emit_code(new_ret_ir(t1));
+  } break;
+  case WHILE: {
+    operand *label1 = new_label(), *label2 = new_label(), *label3 = new_label();
+    emit_code(new_label_ir(label1));
+    translate_cond(get_child_n(root, 2), label2, label3,
+                   get_cond(get_child_n(root, 2)));
+    emit_code(new_label_ir(label2));
+    translate_stmt(get_child_last(root));
+    emit_code(new_goto_ir(label1));
+    emit_code(new_label_ir(label3));
+  } break;
+  case IF: {
+    operand *label1 = new_label(), *label2 = new_label(), *label3 = new_label();
+    translate_cond(get_child_n(root, 2), label1, label2,
+                   get_cond(get_child_n(root, 2)));
+    emit_code(new_label_ir(label1));
+    translate_stmt(get_child_n(root, 4));
+    emit_code(new_goto_ir(label3));
+    emit_code(new_label_ir(label2));
+    translate_stmt(get_child_last(root));
+    emit_code(new_label_ir(label3));
+  } break;
+  default: {
+    fprintf(stderr, "what is this %s\n", head->value.str_val);
+    assert(0);
+  } break;
+  }
 }

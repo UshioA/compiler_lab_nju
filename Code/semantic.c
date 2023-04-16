@@ -13,7 +13,7 @@ frame *global;
 frame *currf; // this name is bad =)
 
 cmm_type *temphead;
-
+int semanerr;
 static char *randstr() {
   char alphabet[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
   char *target = calloc(9, sizeof(char));

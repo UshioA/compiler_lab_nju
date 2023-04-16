@@ -54,11 +54,12 @@ ast_node *get_child_n(ast_node *fa, int n) {
   if (n < 0)
     return NULL;
   ast_node *chn = fa->child;
-  while (n--) {
-    chn = chn->lpeer;
-    if (!chn)
-      return NULL;
-  }
+  if (chn)
+    while (n--) {
+      chn = chn->lpeer;
+      if (!chn)
+        return NULL;
+    }
   return chn;
 }
 

@@ -15,6 +15,8 @@ void init_file(FILE *_f);
 
 void emit_code(intercode *ir);
 
+void init_translate(FILE* _f);
+
 void dump_code();
 
 void translate_program(ast_node *root);
@@ -34,4 +36,5 @@ void translate_cond(ast_node *exp, operand *label_true, operand *label_false,
                     int cond);
 void translate_args(ast_node *root, operand **arg_list, int index);
 void translate_stmtlist(ast_node *root);
+void translate_stmt(ast_node *root);
 #endif

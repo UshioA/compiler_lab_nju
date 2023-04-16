@@ -11,8 +11,10 @@
 extern frame *global;
 extern frame *currf; // this name is bad =)
 extern cmm_type *temphead;
+extern int semanerr;
 static inline void error(int errno, int lineno) {
   fprintf(stdout, "Error type %d at Line %d: .\n", errno, lineno);
+  ++semanerr;
 }
 
 static inline void init_global() {
@@ -38,6 +40,7 @@ static inline void init_tempnode() {
 }
 
 static inline void init_semantic() {
+  semanerr = 0;
   init_tempnode();
   init_global();
   init_rw();

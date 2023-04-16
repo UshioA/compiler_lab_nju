@@ -3,6 +3,7 @@
 *.output
 *.zip
 *.pdf
+*.json
 test*/
 *.py
 workdir/

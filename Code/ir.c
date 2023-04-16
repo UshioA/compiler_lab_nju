@@ -5,19 +5,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int tempcnt = 0;
-static int labelcnt = 0;
+static int tempcnt;
+static int labelcnt;
 intercode *ircode;
 
 static operand *new_v(int kind, int int_val, char *str_val) {
   operand *opr = calloc(1, sizeof(operand));
   opr->kind = kind;
-  if (OPR_IMM <= kind && kind <= OPR_SIZE) {
+  if (OPR_TMP <= kind && kind <= OPR_SIZE) {
     opr->imm = int_val;
   } else if (OPR_VAR <= kind && kind <= OPR_FUNC) {
     opr->varname = str_val;
-  } else {
-    opr->varname = NULL;
   }
   return opr;
 }
@@ -175,7 +173,9 @@ static void op_dump(operand *op, FILE *f) {
     fprintf(f, "l%d", op->imm);
   } break;
   case OPR_FUNC: {
-    fprintf(f, "f%s", op->funcname);
+    if (strcmp(op->funcname, "main"))
+      fprintf(f, "f");
+    fprintf(f, "%s", op->funcname);
   } break;
   case OPR_IMM: {
     fprintf(f, "#%d", op->imm);
@@ -206,7 +206,7 @@ void ir_dump(intercode *ir, FILE *f) {
     op_dump(ir->binop.lhs, f);
     fprintf(f, " := ");
     op_dump(ir->binop.rhs, f);
-    fputs("", f);
+    fprintf(f, "\n");
   } break;
   case IR_PLUS:
   case IR_MINUS:
@@ -220,12 +220,12 @@ void ir_dump(intercode *ir, FILE *f) {
     op_dump(ir->arith.src1, f);
     fprintf(f, " %c ", op);
     op_dump(ir->arith.src2, f);
-    fputs("", f);
+    fprintf(f, "\n");
   } break;
   case IR_GOTO: {
     fprintf(f, "GOTO ");
     op_dump(ir->go.to, f);
-    fputs("", f);
+    fprintf(f, "\n");
   } break;
   case IR_IF_GOTO: {
     fprintf(f, "IF ");
@@ -237,45 +237,45 @@ void ir_dump(intercode *ir, FILE *f) {
     op_dump(ir->ifgo.rel2, f);
     fprintf(f, " GOTO ");
     op_dump(ir->ifgo.to, f);
-    fputs("", f);
+    fprintf(f, "\n");
   } break;
   case IR_RET: {
     fprintf(f, "RETURN ");
     op_dump(ir->ret.ret, f);
-    fputs("", f);
+    fprintf(f, "\n");
   } break;
   case IR_DEC: {
     fprintf(f, "DEC ");
     op_dump(ir->dec.arr, f);
     fprintf(f, " ");
     op_dump(ir->dec.size, f);
-    fputs("", f);
+    fprintf(f, "\n");
   } break;
   case IR_ARG: {
     fprintf(f, "ARG ");
     op_dump(ir->arg.arg, f);
-    fputs("", f);
+    fprintf(f, "\n");
   } break;
   case IR_CALL: {
     op_dump(ir->call.ret, f);
     fprintf(f, " := CALL ");
     op_dump(ir->call.func, f);
-    fputs("", f);
+    fprintf(f, "\n");
   } break;
   case IR_PARAM: {
     fprintf(f, "PARAM ");
     op_dump(ir->arg.arg, f);
-    fputs("", f);
+    fprintf(f, "\n");
   } break;
   case IR_READ: {
     fprintf(f, "READ ");
     op_dump(ir->arg.arg, f);
-    fputs("", f);
+    fprintf(f, "\n");
   } break;
   case IR_WRITE: {
     fprintf(f, "WRITE ");
     op_dump(ir->arg.arg, f);
-    fputs("", f);
+    fprintf(f, "\n");
   } break;
   default: {
     fprintf(stderr, "invalid ir type\n");
