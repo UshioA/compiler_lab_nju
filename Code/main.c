@@ -25,11 +25,12 @@ int main(int argc, char **argv) {
       do_semantic(ast_root);
     }
     if (!semanerr) {
-      if (argc <= 2)
-        ff = stdout;
       init_ircode();
       translate_program(ast_root);
-      ff = fopen(argv[2], "w");
+      if (argc <= 2)
+        ff = stdout;
+      else
+        ff = fopen(argv[2], "w");
       init_file(ff);
       dump_code();
     }

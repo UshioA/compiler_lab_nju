@@ -153,7 +153,7 @@ void translate_dec(ast_node *root) {
   symbol *sym = translate_vardec(get_child_n(root, 0), 0);
   if (root->childnum == 3) {
     operand *tmp = new_tempvar();
-    translate_expr(get_child_n(root, 2), tmp);
+    translate_expr(get_child_n(root, 2), tmp, 1, NULL);
     if (tmp->array && tmp->addr) {
       tmp = new_v(tmp->kind, tmp->tempno, NULL);
       tmp->deref = 1;
@@ -235,26 +235,29 @@ void translate_cond(ast_node *exp, operand *label_true, operand *label_false,
   switch (cond) {
   case COND_RELOP: {
     operand *t1 = new_tempvar(), *t2 = new_tempvar();
-    translate_expr(get_child_n(exp, 0), t1);
-    translate_expr(get_child_n(exp, 2), t2);
-    if (t1->array) {
-      if (t1->addr) {
-        t1 = new_v(t1->kind, t1->tempno, NULL);
-        t1->deref = 1;
-      }
-    }
-    if (t2->array) {
+    translate_expr(get_child_n(exp, 0), t1, 1, NULL);
+    translate_expr(get_child_n(exp, 2), t2, 1, NULL);
+    if (t1->addr) {
       if (t2->addr) {
-        t2 = new_v(t2->kind, t2->tempno, NULL);
-        t2->deref = 1;
+        operand *tt1 = new_v(t1->kind, t1->tempno, NULL);
+        operand *tt2 = new_v(t2->kind, t2->tempno, NULL);
+        tt1->deref = tt2->deref = 1;
+        emit_code(new_assign_ir(t1, tt1));
+        emit_code(new_assign_ir(t2, tt2));
+      } else {
+        operand *tt1 = new_v(t1->kind, t1->tempno, NULL);
+        tt1->deref = 1;
+        emit_code(new_assign_ir(t1, tt1));
+      }
+    } else {
+      if (t2->addr) {
+        operand *tt2 = new_v(t2->kind, t2->tempno, NULL);
+        tt2->deref = 1;
+        emit_code(new_assign_ir(t2, tt2));
       }
     }
-    operand *t3 = new_tempvar();
-    emit_code(new_assign_ir(t3, t1));
-    operand *t4 = new_tempvar();
-    emit_code(new_assign_ir(t4, t2));
     char *op = get_child_n(exp, 1)->value.str_val;
-    emit_code(new_ifgoto_ir(op, t3, t4, label_true));
+    emit_code(new_ifgoto_ir(op, t1, t2, label_true));
     emit_code(new_goto_ir(label_false));
   } break;
   case COND_NOT: {
@@ -279,7 +282,7 @@ void translate_cond(ast_node *exp, operand *label_true, operand *label_false,
   } break;
   case COND_OTHER: {
     operand *t1 = new_tempvar();
-    translate_expr(exp, t1);
+    translate_expr(exp, t1, 1, NULL);
     if (t1->addr && t1->array) {
       t1 = new_v(t1->kind, t1->tempno, NULL);
       t1->deref = 1;
@@ -294,16 +297,13 @@ static uint32_t prodsuffix(uint32_t *arr, int end) {
   uint32_t p = 1;
   if (!arr)
     return p;
-  // printf("=== len: %d ===\n", arr[0]);
   for (int i = 1; i < arr[0]; ++i) {
-    // printf("multiply %d", arr[i]);
     p *= arr[i];
   }
-  // printf("=== ==== == ===\n");
   return p;
 }
 
-void translate_expr(ast_node *root, operand *tmp) {
+void translate_expr(ast_node *root, operand *tmp, int pass, operand *reuse) {
   switch (root->childnum) {
   case 1: { // ID INT FLOAT
     ast_node *ch = get_child_last(root);
@@ -317,13 +317,17 @@ void translate_expr(ast_node *root, operand *tmp) {
           !sym->is_arg) {
         op->ref = 1;
       }
-      intercode *id = new_assign_ir(tmp, op);
-      emit_code(id);
+      if (pass) {
+        intercode *id = new_assign_ir(tmp, op);
+        emit_code(id);
+      }
     } break;
     case INT: {
       int v = ch->value.int_val;
-      intercode *integer = new_assign_ir(tmp, new_imm(v));
-      emit_code(integer);
+      if (pass) {
+        intercode *integer = new_assign_ir(tmp, new_imm(v));
+        emit_code(integer);
+      }
     } break;
     case FLOAT: {
       fprintf(stderr, "对不起, 建议你玩原神\n");
@@ -338,7 +342,11 @@ void translate_expr(ast_node *root, operand *tmp) {
     if (op->symbol == MINUS) {
       operand *t1 = new_tempvar();
       ast_node *exp = get_child_last(root);
-      translate_expr(exp, t1);
+      if (exp->child->symbol == INT) {
+        emit_code(new_assign_ir(tmp, new_imm(-exp->child->value.int_val)));
+        return;
+      }
+      translate_expr(exp, t1, 1, NULL);
       if (t1->addr) {
         operand *tt1 = new_v(t1->kind, t1->tempno, NULL);
         tt1->deref = 1;
@@ -363,7 +371,7 @@ void translate_expr(ast_node *root, operand *tmp) {
       }
     } break;
     case LP: { // bullshit =)
-      translate_expr(get_child_n(root, 1), tmp);
+      translate_expr(get_child_n(root, 1), tmp, 1, NULL);
     } break;
     case Exp: {
       ast_node *ch2 = get_child_n(root, 1);
@@ -376,31 +384,45 @@ void translate_expr(ast_node *root, operand *tmp) {
         handle_cond(root, tmp);
       } break;
       case ASSIGNOP: {
-        if (head->child->symbol == ID) {
+        if (head->childnum == 1 && head->child->symbol == ID) {
           symbol *sym = frame_lookup(global, head->child->value.str_val);
-          operand *t1 = new_tempvar();
-          translate_expr(get_child_n(root, 2), t1);
+          operand *t1 = tmp;
           operand *var = new_var(sym->name);
-          if (t1->array && t1->addr) {
-            t1 = new_v(t1->kind, t1->tempno, NULL);
-            t1->deref = 1;
+          ast_node *exp2 = get_child_n(root, 2);
+          if (exp2->childnum == 1 && exp2->child->symbol == INT) {
+            emit_code(new_assign_ir(var, new_imm(exp2->child->value.int_val)));
+            *tmp = *var;
+          } else if (exp2->childnum == 1 && exp2->child->symbol == ID) {
+            symbol *sym2 = frame_lookup(global, exp2->child->value.str_val);
+            operand *op = new_var(sym2->name);
+            if (!sym2->type->is_basetype && sym2->type->ctype == TYPE_ARR &&
+                !sym2->is_arg)
+              op->ref = 1;
+            emit_code(new_assign_ir(var, op));
+            *tmp = *var;
+            // if (pass)
+            //   emit_code(new_assign_ir(tmp, var));
+          } else {
+            translate_expr(exp2, t1, 1, NULL);
+            if (t1->array && t1->addr) {
+              t1 = new_v(t1->kind, t1->tempno, NULL);
+              t1->deref = 1;
+            }
+            emit_code(new_assign_ir(var, t1));
           }
-          emit_code(new_assign_ir(var, t1));
-          emit_code(new_assign_ir(tmp, var));
         } else {
           operand *t1 = tmp;
           operand *t2 = new_tempvar();
-          translate_expr(head, t1);
-          translate_expr(get_child_n(root, 2), t2);
+          translate_expr(head, t1, 1, NULL);
+          translate_expr(get_child_n(root, 2), t2, 1, NULL);
           if (t1->addr) {
             if (t2->addr) {
-              operand *t3 = new_tempvar();
               operand *tt1 = new_v(OPR_TMP, t1->tempno, NULL);
               operand *tt2 = new_v(OPR_TMP, t2->tempno, NULL);
               tt2->deref = 1;
-              emit_code(new_assign_ir(t3, tt2));
+              emit_code(new_assign_ir(t2, tt2));
               tt1->deref = 1;
-              emit_code(new_assign_ir(tt1, t3));
+              emit_code(new_assign_ir(tt1, t2));
             } else {
               operand *tt1 = new_v(OPR_TMP, t1->tempno, NULL);
               tt1->deref = 1;
@@ -425,26 +447,30 @@ void translate_expr(ast_node *root, operand *tmp) {
       case STAR:
       case DIV: {
         operand *t1 = new_tempvar(), *t2 = new_tempvar();
-        translate_expr(head, t1);
-        translate_expr(get_child_last(root), t2);
-        if (t1->array) {
+        translate_expr(head, t1, 1, NULL);
+        translate_expr(get_child_last(root), t2, 1, NULL);
+        if (pass) {
           if (t1->addr) {
-            t1 = new_v(t1->kind, t1->tempno, NULL);
-            t1->deref = 1;
+            if (t2->addr) {
+              operand *tt1 = new_v(t1->kind, t1->tempno, NULL);
+              operand *tt2 = new_v(t2->kind, t2->tempno, NULL);
+              tt1->deref = tt2->deref = 1;
+              emit_code(new_assign_ir(t1, tt1));
+              emit_code(new_assign_ir(t2, tt2));
+            } else {
+              operand *tt1 = new_v(t1->kind, t1->tempno, NULL);
+              tt1->deref = 1;
+              emit_code(new_assign_ir(t1, tt1));
+            }
+          } else {
+            if (t2->addr) {
+              operand *tt2 = new_v(t2->kind, t2->tempno, NULL);
+              tt2->deref = 1;
+              emit_code(new_assign_ir(t2, tt2));
+            }
           }
+          emit_code(new_arith_ir(ch2->symbol, t1, t2, tmp));
         }
-        if (t2->array) {
-          if (t2->addr) {
-            t2 = new_v(t2->kind, t2->tempno, NULL);
-            t2->deref = 1;
-          }
-        }
-        operand *t3 = new_tempvar();
-        emit_code(new_assign_ir(t3, t1));
-        operand *t4 = new_tempvar();
-        emit_code(new_assign_ir(t4, t2));
-        emit_code(new_arith_ir(ch2->symbol, t3, t4, tmp));
-        // emit_code(new_arith_ir(ch2->symbol, t1, t2, tmp));
       } break;
       default:
         assert(0);
@@ -460,7 +486,8 @@ void translate_expr(ast_node *root, operand *tmp) {
       translate_args(get_child_n(root, 2), arglist, sym->type->contain_len - 1);
       if (!strcmp(sym->name, "write")) {
         emit_code(new_write_ir(arglist[0]));
-        emit_code(new_assign_ir(tmp, new_imm(0)));
+        if (pass)
+          emit_code(new_assign_ir(tmp, new_imm(0)));
       } else {
         for (int i = 0; i < sym->type->contain_len; ++i) {
           emit_code(new_arg_ir(arglist[i]));
@@ -468,13 +495,22 @@ void translate_expr(ast_node *root, operand *tmp) {
         emit_code(new_call_ir(new_func(sym->name), tmp));
       }
     } else if (head->symbol == Exp) {
-      operand *t2 = new_tempvar();
-      translate_expr(head, tmp);
-      translate_expr(get_child_n(root, 2), t2);
-      cmm_type *arrtype = get_child_n(root, 2)->arrtype;
+      operand *t2 = reuse;
+      if (!t2)
+        t2 = new_tempvar();
+      ast_node *exp = get_child_n(root, 2);
+      cmm_type *arrtype = exp->arrtype;
       uint32_t width = arrtype ? 4 * prodsuffix(arrtype->dimensions, 2) : 0;
-      emit_code(new_arith_ir(STAR, t2, new_imm(width), t2));
-      emit_code(new_arith_ir(PLUS, tmp, t2, tmp));
+      translate_expr(head, tmp, 1, t2);
+      if (exp->child && exp->child->symbol == INT) {
+        emit_code(new_arith_ir(STAR, new_imm(width),
+                               new_imm(exp->child->value.int_val), t2));
+      } else {
+        translate_expr(exp, t2, 1, NULL);
+        emit_code(new_arith_ir(STAR, t2, new_imm(width), t2));
+      }
+      if (pass)
+        emit_code(new_arith_ir(PLUS, tmp, t2, tmp));
       tmp->array = 1;
       if (arrtype->contain_len <= 1)
         tmp->addr = 1;
@@ -488,13 +524,11 @@ void translate_expr(ast_node *root, operand *tmp) {
 
 void translate_args(ast_node *root, operand **arg_list, int index) {
   operand *t1 = new_tempvar();
-  translate_expr(root->child, t1);
-  if (t1->array) {
-    if (t1->addr) {
-      operand *tt1 = new_v(OPR_TMP, t1->tempno, NULL);
-      tt1->deref = 1;
-      emit_code(new_assign_ir(t1, tt1));
-    }
+  translate_expr(root->child, t1, 1, NULL);
+  if (t1->addr) {
+    operand *tt1 = new_v(OPR_TMP, t1->tempno, NULL);
+    tt1->deref = 1;
+    emit_code(new_assign_ir(t1, tt1));
   }
   arg_list[index] = t1;
   if (root->childnum == 3) {
@@ -519,14 +553,14 @@ void translate_stmt(ast_node *root) {
   switch (head->symbol) {
   case Exp: {
     operand *tmp = new_tempvar();
-    translate_expr(head, tmp);
+    translate_expr(head, tmp, 0, NULL);
   } break;
   case CompSt: {
     translate_compst(head);
   } break;
   case RETURN: {
     operand *t1 = new_tempvar();
-    translate_expr(get_child_n(root, 1), t1);
+    translate_expr(get_child_n(root, 1), t1, 1, NULL);
     if (t1->array && t1->addr) {
       t1 = new_v(t1->kind, t1->tempno, NULL);
       t1->deref = 1;
@@ -544,17 +578,21 @@ void translate_stmt(ast_node *root) {
     emit_code(new_label_ir(label3));
   } break;
   case IF: {
-    operand *label1 = new_label(), *label2 = new_label(), *label3 = new_label();
+    operand *label1 = new_label(), *label2 = new_label();
+    operand *label3;
+    if (get_child_last(root) != get_child_n(root, 4))
+      label3 = new_label();
     translate_cond(get_child_n(root, 2), label1, label2,
                    get_cond(get_child_n(root, 2)));
     emit_code(new_label_ir(label1));
     translate_stmt(get_child_n(root, 4));
-    emit_code(new_goto_ir(label3));
+    if (get_child_last(root) != get_child_n(root, 4))
+      emit_code(new_goto_ir(label3));
     emit_code(new_label_ir(label2));
     if (get_child_last(root) != get_child_n(root, 4)) {
       translate_stmt(get_child_last(root));
+      emit_code(new_label_ir(label3));
     }
-    emit_code(new_label_ir(label3));
   } break;
   default: {
     fprintf(stderr, "what is this %s\n", head->value.str_val);

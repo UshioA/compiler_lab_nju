@@ -15,7 +15,7 @@ void init_file(FILE *_f);
 
 void emit_code(intercode *ir);
 
-void init_translate(FILE* _f);
+void init_translate(FILE *_f);
 
 void dump_code();
 
@@ -31,7 +31,7 @@ void translate_deflist(ast_node *root);
 void translate_def(ast_node *root);
 void translate_declist(ast_node *root);
 void translate_dec(ast_node *root);
-void translate_expr(ast_node *root, operand *);
+void translate_expr(ast_node *root, operand *, int pass, operand*);
 void translate_cond(ast_node *exp, operand *label_true, operand *label_false,
                     int cond);
 void translate_args(ast_node *root, operand **arg_list, int index);
