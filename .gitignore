@@ -6,6 +6,7 @@
 *.json
 test*/
 *.py
+*.ir
 irsim
 .cache
 workdir/
