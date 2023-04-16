@@ -6,7 +6,10 @@
 *.json
 test*/
 *.py
+irsim
+.cache
 workdir/
+README.md
 *.sh
 parser
 .vscode/

@@ -1,0 +1,11 @@
+int main(){
+  int m[2][2];
+  m[0][0]=read();
+  m[0][1]=read();
+  m[1][0]=read();
+  m[1][1]=read();
+  write(-m[0][0]);
+  write(-m[0][1]);
+  write(-m[1][0]);
+  write(-m[1][1]);
+}
