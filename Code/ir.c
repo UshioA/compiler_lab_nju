@@ -9,7 +9,7 @@ static int tempcnt;
 static int labelcnt;
 intercode *ircode;
 
-static operand *new_v(int kind, int int_val, char *str_val) {
+operand *new_v(int kind, int int_val, char *str_val) {
   operand *opr = calloc(1, sizeof(operand));
   opr->kind = kind;
   if (OPR_TMP <= kind && kind <= OPR_SIZE) {
@@ -67,7 +67,7 @@ intercode *new_arith_ir(int symbol, operand *src1, operand *src2,
   } break;
   case DIV: {
     ir->kind = IR_DIV;
-  }
+  } break;
   default: {
     fprintf(stderr, "invalid arith op\n");
     assert(0);

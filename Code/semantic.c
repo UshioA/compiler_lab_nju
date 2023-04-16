@@ -257,7 +257,7 @@ static void paramdec(ast_node *root, cmm_type *_v) {
   ast_node *_vardec = get_child_n(root, 1);
   if (_specifier) {
     cmm_type *spec = specifier(_specifier, NULL);
-    vardec(_vardec, spec, 0, NULL);
+    vardec(_vardec, spec, 0, NULL)->is_arg = 1;
     ctype_add_tail(ctypecpy(spec), _v);
   }
 }
@@ -523,6 +523,7 @@ static cmm_type *expr(ast_node *root) { //屎
       }
       ast_node *index = get_child_n(root, 2);
       index->arrtype = atype;
+      head->arrtype = atype;
       cmm_type *_index = expr(index);
       if (_index->errcode == NO_ERR &&
           (!_index->is_basetype || _index->btype->dectype != INT)) {
@@ -533,10 +534,10 @@ static cmm_type *expr(ast_node *root) { //屎
       if (atype->contain_len > 1) {
         c = new_cmm_ctype(TYPE_ARR, atype->btype);
         c->contain_len = atype->contain_len - 1;
-        c->dimensions = calloc(c->contain_len + 1, sizeof(uint32_t));
+        c->dimensions = calloc(atype->contain_len + 1, sizeof(uint32_t));
         c->dimensions[0] = c->contain_len;
         memcpy(c->dimensions + 1, atype->dimensions + 1,
-               c->contain_len * sizeof(uint32_t));
+               atype->contain_len * sizeof(uint32_t));
         c->errcode =
             atype->errcode != NO_ERR ? atype->errcode : _index->errcode;
         return c;

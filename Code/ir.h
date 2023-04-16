@@ -20,6 +20,9 @@ typedef struct operand {
   int deref;
   int ref;
 
+  int addr;
+  int array;
+
   union {
     int tempno;
     int imm;
@@ -108,6 +111,7 @@ typedef struct _intercode {
 extern intercode *ircode;
 
 void init_ircode();
+operand *new_v(int kind, int int_val, char *str_val);
 operand *new_tempvar();
 operand *new_label();
 
@@ -116,7 +120,7 @@ operand *new_var(char *varname);
 operand *new_size(int size);
 operand *new_func(char *funcname);
 
-intercode *new_label_ir(operand* label);
+intercode *new_label_ir(operand *label);
 intercode *new_func_ir(operand *funcname);
 intercode *new_assign_ir(operand *lhs, operand *rhs);
 intercode *new_arith_ir(int kind, operand *src1, operand *src2, operand *dest);

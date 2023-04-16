@@ -10,5 +10,131 @@
     "directory": "/home/kirisame/Lab/Code",
     "file": "/home/kirisame/Lab/Code/syntax.tab.c",
     "output": "/home/kirisame/Lab/Code/syntax.tab.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-std=c99",
+      "-ggdb",
+      "-c",
+      "-o",
+      "type.o",
+      "type.c"
+    ],
+    "directory": "/home/kirisame/Lab/Code",
+    "file": "/home/kirisame/Lab/Code/type.c",
+    "output": "/home/kirisame/Lab/Code/type.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-std=c99",
+      "-ggdb",
+      "-c",
+      "-o",
+      "main.o",
+      "main.c"
+    ],
+    "directory": "/home/kirisame/Lab/Code",
+    "file": "/home/kirisame/Lab/Code/main.c",
+    "output": "/home/kirisame/Lab/Code/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-std=c99",
+      "-ggdb",
+      "-c",
+      "-o",
+      "semantic.o",
+      "semantic.c"
+    ],
+    "directory": "/home/kirisame/Lab/Code",
+    "file": "/home/kirisame/Lab/Code/semantic.c",
+    "output": "/home/kirisame/Lab/Code/semantic.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-std=c99",
+      "-ggdb",
+      "-c",
+      "-o",
+      "frame.o",
+      "frame.c"
+    ],
+    "directory": "/home/kirisame/Lab/Code",
+    "file": "/home/kirisame/Lab/Code/frame.c",
+    "output": "/home/kirisame/Lab/Code/frame.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-std=c99",
+      "-ggdb",
+      "-c",
+      "-o",
+      "ast.o",
+      "ast.c"
+    ],
+    "directory": "/home/kirisame/Lab/Code",
+    "file": "/home/kirisame/Lab/Code/ast.c",
+    "output": "/home/kirisame/Lab/Code/ast.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-std=c99",
+      "-ggdb",
+      "-c",
+      "-o",
+      "ir.o",
+      "ir.c"
+    ],
+    "directory": "/home/kirisame/Lab/Code",
+    "file": "/home/kirisame/Lab/Code/ir.c",
+    "output": "/home/kirisame/Lab/Code/ir.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-std=c99",
+      "-ggdb",
+      "-c",
+      "-o",
+      "list.o",
+      "list.c"
+    ],
+    "directory": "/home/kirisame/Lab/Code",
+    "file": "/home/kirisame/Lab/Code/list.c",
+    "output": "/home/kirisame/Lab/Code/list.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-std=c99",
+      "-ggdb",
+      "-c",
+      "-o",
+      "translate.o",
+      "translate.c"
+    ],
+    "directory": "/home/kirisame/Lab/Code",
+    "file": "/home/kirisame/Lab/Code/translate.c",
+    "output": "/home/kirisame/Lab/Code/translate.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-std=c99",
+      "-ggdb",
+      "-c",
+      "-o",
+      "symtab.o",
+      "symtab.c"
+    ],
+    "directory": "/home/kirisame/Lab/Code",
+    "file": "/home/kirisame/Lab/Code/symtab.c",
+    "output": "/home/kirisame/Lab/Code/symtab.o"
   }
 ]
