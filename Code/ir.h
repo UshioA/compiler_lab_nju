@@ -1,6 +1,7 @@
 #ifndef __CMM_IR_H__
 #define __CMM_IR_H__
 
+#include "ast.h"
 #include "list.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +23,7 @@ typedef struct operand {
 
   int addr;
   int array;
+  cmm_type* arr;
 
   union {
     int tempno;

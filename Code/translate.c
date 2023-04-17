@@ -8,10 +8,11 @@
 #include "syntax.tab.h"
 #include <assert.h>
 #include <stdint.h>
+#include <stdio.h>
 
 static const char *trans_error =
     "Cannot translate: Code contains variables or parameters of structure "
-    "type.";
+    "type.\n";
 
 FILE *f;
 
@@ -154,7 +155,7 @@ void translate_dec(ast_node *root) {
   if (root->childnum == 3) {
     operand *tmp = new_tempvar();
     translate_expr(get_child_n(root, 2), tmp, 1, NULL);
-    if (tmp->array && tmp->addr) {
+    if (tmp->addr) {
       tmp = new_v(tmp->kind, tmp->tempno, NULL);
       tmp->deref = 1;
     }
@@ -283,7 +284,7 @@ void translate_cond(ast_node *exp, operand *label_true, operand *label_false,
   case COND_OTHER: {
     operand *t1 = new_tempvar();
     translate_expr(exp, t1, 1, NULL);
-    if (t1->addr && t1->array) {
+    if (t1->addr) {
       t1 = new_v(t1->kind, t1->tempno, NULL);
       t1->deref = 1;
     }
@@ -297,10 +298,42 @@ static uint32_t prodsuffix(uint32_t *arr, int end) {
   uint32_t p = 1;
   if (!arr)
     return p;
-  for (int i = 1; i < arr[0]; ++i) {
+  for (int i = 1; i < end; ++i) {
     p *= arr[i];
   }
   return p;
+}
+
+static void handle_array_assign(operand *t1, operand *t2, operand *tmp) {
+  if (t1->array) {
+    assert(t2->array);
+    operand *tback = new_tempvar();
+    emit_code(new_assign_ir(tback, t1));
+    int m = prodsuffix(t1->arr->dimensions, t1->arr->dimensions[0] + 1);
+    int n = prodsuffix(t2->arr->dimensions, t1->arr->dimensions[0] + 1);
+    int len = m > n ? m : n;
+    operand *tt = new_tempvar();
+    operand *tr1 = new_v(t1->kind, t1->tempno, t1->varname);
+    operand *tr2 = new_v(t2->kind, t2->tempno, t2->varname);
+    operand *td1 = new_v(t1->kind, t1->tempno, t1->varname);
+    operand *td2 = new_v(t2->kind, t2->tempno, t2->varname);
+    td1->deref = td2->deref = 1;
+    operand *tt1;
+    operand *tt2;
+    for (int i = 0; i < len; ++i) {
+      tt1 = td1;
+      tt2 = td2;
+      emit_code(new_assign_ir(tt, tt2));
+      emit_code(new_assign_ir(tt1, tt));
+      tt1 = tr1;
+      tt2 = tr2;
+      emit_code(new_arith_ir(PLUS, tt1, new_imm(4), tt1));
+      emit_code(new_arith_ir(PLUS, tt2, new_imm(4), tt2));
+    }
+    tmp->array = 1;
+    tmp->arr = t1->arr;
+    emit_code(new_assign_ir(tmp, tback));
+  }
 }
 
 void translate_expr(ast_node *root, operand *tmp, int pass, operand *reuse) {
@@ -313,12 +346,19 @@ void translate_expr(ast_node *root, operand *tmp, int pass, operand *reuse) {
       if (sym->type->is_basetype && sym->type->btype->dectype == STRUCT)
         translate_error();
       operand *op = new_var(sym->name);
+      if (!sym->type->is_basetype && sym->type->ctype == TYPE_ARR) {
+        op->array = 1;
+        op->arr = sym->type;
+      }
       if (!sym->type->is_basetype && sym->type->ctype == TYPE_ARR &&
           !sym->is_arg) {
         op->ref = 1;
       }
       if (pass) {
         intercode *id = new_assign_ir(tmp, op);
+        tmp->arr = op->arr;
+        tmp->array = op->array;
+        tmp->ref = 0;
         emit_code(id);
       }
     } break;
@@ -386,45 +426,47 @@ void translate_expr(ast_node *root, operand *tmp, int pass, operand *reuse) {
       case ASSIGNOP: {
         if (head->childnum == 1 && head->child->symbol == ID) {
           symbol *sym = frame_lookup(global, head->child->value.str_val);
-          operand *t1 = tmp;
+          operand *t2 = new_tempvar();
           operand *var = new_var(sym->name);
           ast_node *exp2 = get_child_n(root, 2);
-          if (exp2->childnum == 1 && exp2->child->symbol == INT) {
-            emit_code(new_assign_ir(var, new_imm(exp2->child->value.int_val)));
-            *tmp = *var;
-          } else if (exp2->childnum == 1 && exp2->child->symbol == ID) {
-            symbol *sym2 = frame_lookup(global, exp2->child->value.str_val);
-            operand *op = new_var(sym2->name);
-            if (!sym2->type->is_basetype && sym2->type->ctype == TYPE_ARR &&
-                !sym2->is_arg)
-              op->ref = 1;
-            emit_code(new_assign_ir(var, op));
-            *tmp = *var;
-            // if (pass)
-            //   emit_code(new_assign_ir(tmp, var));
-          } else {
-            translate_expr(exp2, t1, 1, NULL);
-            if (t1->array && t1->addr) {
-              t1 = new_v(t1->kind, t1->tempno, NULL);
-              t1->deref = 1;
-            }
-            emit_code(new_assign_ir(var, t1));
+          operand *t1 = var;
+          if (!sym->type->is_basetype && sym->type->ctype == TYPE_ARR) {
+            var->array = 1;
+            var->arr = sym->type;
+            var->ref = !sym->is_arg;
           }
+          translate_expr(exp2, t2, 1, NULL);
+          if (t2->addr) {
+            t2 = new_v(t2->kind, t2->tempno, NULL);
+            t2->deref = 1;
+          } else if (t2->array) {
+            assert(t1->array);
+            t1 = new_tempvar();
+            t1->arr = var->arr;
+            t1->array = var->array;
+            emit_code(new_assign_ir(t1, var));
+            handle_array_assign(t1, t2, tmp);
+            return;
+          }
+          emit_code(new_assign_ir(var, t2));
+          emit_code(new_assign_ir(tmp, var));
         } else {
-          operand *t1 = tmp;
+          operand *t1 = new_tempvar();
           operand *t2 = new_tempvar();
+          operand *tt1 = t1;
+          operand *tt2 = t2;
           translate_expr(head, t1, 1, NULL);
           translate_expr(get_child_n(root, 2), t2, 1, NULL);
           if (t1->addr) {
             if (t2->addr) {
-              operand *tt1 = new_v(OPR_TMP, t1->tempno, NULL);
-              operand *tt2 = new_v(OPR_TMP, t2->tempno, NULL);
+              tt1 = new_v(OPR_TMP, t1->tempno, NULL);
+              tt2 = new_v(OPR_TMP, t2->tempno, NULL);
               tt2->deref = 1;
               emit_code(new_assign_ir(t2, tt2));
               tt1->deref = 1;
               emit_code(new_assign_ir(tt1, t2));
             } else {
-              operand *tt1 = new_v(OPR_TMP, t1->tempno, NULL);
+              tt1 = new_v(OPR_TMP, t1->tempno, NULL);
               tt1->deref = 1;
               emit_code(new_assign_ir(tt1, t2));
             }
@@ -434,9 +476,15 @@ void translate_expr(ast_node *root, operand *tmp, int pass, operand *reuse) {
               tt2->deref = 1;
               emit_code(new_assign_ir(t1, tt2));
             } else {
-              emit_code(new_assign_ir(t1, t2));
+              if (t1->array) {
+                handle_array_assign(t1, t2, tmp);
+                return;
+              } else {
+                assert(!t2->array);
+              }
             }
           }
+          emit_code(new_assign_ir(tmp, tt1));
         }
       } break;
       case RELOP: {
@@ -500,7 +548,9 @@ void translate_expr(ast_node *root, operand *tmp, int pass, operand *reuse) {
         t2 = new_tempvar();
       ast_node *exp = get_child_n(root, 2);
       cmm_type *arrtype = exp->arrtype;
-      uint32_t width = arrtype ? 4 * prodsuffix(arrtype->dimensions, 2) : 0;
+      uint32_t width =
+          arrtype ? 4 * prodsuffix(arrtype->dimensions, arrtype->dimensions[0])
+                  : 0;
       translate_expr(head, tmp, 1, t2);
       if (exp->child && exp->child->symbol == INT) {
         emit_code(new_arith_ir(STAR, new_imm(width),
@@ -511,9 +561,11 @@ void translate_expr(ast_node *root, operand *tmp, int pass, operand *reuse) {
       }
       if (pass)
         emit_code(new_arith_ir(PLUS, tmp, t2, tmp));
-      tmp->array = 1;
+      tmp->arr = arrtype;
       if (arrtype->contain_len <= 1)
         tmp->addr = 1;
+      else
+        tmp->array = 1;
     } else
       assert(0);
   } break;
@@ -561,7 +613,7 @@ void translate_stmt(ast_node *root) {
   case RETURN: {
     operand *t1 = new_tempvar();
     translate_expr(get_child_n(root, 1), t1, 1, NULL);
-    if (t1->array && t1->addr) {
+    if (t1->addr) {
       t1 = new_v(t1->kind, t1->tempno, NULL);
       t1->deref = 1;
     }
