@@ -243,18 +243,21 @@ void translate_cond(ast_node *exp, operand *label_true, operand *label_false,
         operand *tt1 = new_v(t1->kind, t1->tempno, NULL);
         operand *tt2 = new_v(t2->kind, t2->tempno, NULL);
         tt1->deref = tt2->deref = 1;
-        emit_code(new_assign_ir(t1, tt1));
-        emit_code(new_assign_ir(t2, tt2));
+        t1 = tt1, t2 = tt2;
+        // emit_code(new_assign_ir(t1, tt1));
+        // emit_code(new_assign_ir(t2, tt2));
       } else {
         operand *tt1 = new_v(t1->kind, t1->tempno, NULL);
         tt1->deref = 1;
-        emit_code(new_assign_ir(t1, tt1));
+        t1 = tt1;
+        // emit_code(new_assign_ir(t1, tt1));
       }
     } else {
       if (t2->addr) {
         operand *tt2 = new_v(t2->kind, t2->tempno, NULL);
         tt2->deref = 1;
-        emit_code(new_assign_ir(t2, tt2));
+        t2 = tt2;
+        // emit_code(new_assign_ir(t2, tt2));
       }
     }
     char *op = get_child_n(exp, 1)->value.str_val;
@@ -462,9 +465,12 @@ void translate_expr(ast_node *root, operand *tmp, int pass, operand *reuse) {
               tt1 = new_v(OPR_TMP, t1->tempno, NULL);
               tt2 = new_v(OPR_TMP, t2->tempno, NULL);
               tt2->deref = 1;
-              emit_code(new_assign_ir(t2, tt2));
               tt1->deref = 1;
-              emit_code(new_assign_ir(tt1, t2));
+              emit_code(new_assign_ir(tt1, tt2));
+              // tt2->deref = 1;
+              // emit_code(new_assign_ir(t2, tt2));
+              // tt1->deref = 1;
+              // emit_code(new_assign_ir(tt1, t2));
             } else {
               tt1 = new_v(OPR_TMP, t1->tempno, NULL);
               tt1->deref = 1;
@@ -503,18 +509,21 @@ void translate_expr(ast_node *root, operand *tmp, int pass, operand *reuse) {
               operand *tt1 = new_v(t1->kind, t1->tempno, NULL);
               operand *tt2 = new_v(t2->kind, t2->tempno, NULL);
               tt1->deref = tt2->deref = 1;
-              emit_code(new_assign_ir(t1, tt1));
-              emit_code(new_assign_ir(t2, tt2));
+              t1 = tt1, t2 = tt2;
+              // emit_code(new_assign_ir(t1, tt1));
+              // emit_code(new_assign_ir(t2, tt2));
             } else {
               operand *tt1 = new_v(t1->kind, t1->tempno, NULL);
               tt1->deref = 1;
-              emit_code(new_assign_ir(t1, tt1));
+              t1 = tt1;
+              // emit_code(new_assign_ir(t1, tt1));
             }
           } else {
             if (t2->addr) {
               operand *tt2 = new_v(t2->kind, t2->tempno, NULL);
               tt2->deref = 1;
-              emit_code(new_assign_ir(t2, tt2));
+              t2 = tt2;
+              // emit_code(new_assign_ir(t2, tt2));
             }
           }
           emit_code(new_arith_ir(ch2->symbol, t1, t2, tmp));
