@@ -1,12 +1,14 @@
 #ifndef __CMM_TRANSLATE_H__
 #define __CMM_TRANSLATE_H__
+#include "array.h"
 #include "ast.h"
 #include "frame.h"
 #include "ir.h"
 #include "list.h"
 #include "symtab.h"
 #include <stdio.h>
-extern intercode *ircode;
+// extern intercode *ircode;
+extern array* ir_list;
 extern ast_node *ast_root;
 extern frame *global;
 extern FILE *f;

@@ -1,4 +1,5 @@
 #include "translate.h"
+#include "array.h"
 #include "ast.h"
 #include "frame.h"
 #include "ir.h"
@@ -33,9 +34,12 @@ void init_file(FILE *_f) { f = _f; }
 void emit_code(intercode *ir) { ir_pushback(ir); }
 
 void dump_code() {
-  intercode *pos;
-  list_entry *head = &ircode->link;
-  list_for_each_item(pos, head, link) { ir_dump(pos, f); }
+  for (int i = 0; i < ir_list->length; ++i) {
+    ir_dump(ir_list->elem[i], f);
+  }
+  // intercode *pos;
+  // list_entry *head = &ircode->link;
+  // list_for_each_item(pos, head, link) { ir_dump(pos, f); }
 }
 
 void translate_program(ast_node *root) {

@@ -1,6 +1,7 @@
 #ifndef __CMM_IR_H__
 #define __CMM_IR_H__
 
+#include "array.h"
 #include "ast.h"
 #include "list.h"
 #include <stdio.h>
@@ -23,7 +24,7 @@ typedef struct operand {
 
   int addr;
   int array;
-  cmm_type* arr;
+  cmm_type *arr;
 
   union {
     int tempno;
@@ -51,7 +52,8 @@ typedef struct _intercode {
     IR_CALL,
     IR_PARAM,
     IR_READ,
-    IR_WRITE
+    IR_WRITE,
+    IR_PASS,
   } kind;
 
   union {
@@ -111,6 +113,7 @@ typedef struct _intercode {
 } intercode;
 
 extern intercode *ircode;
+extern array *ir_list;
 
 void init_ircode();
 operand *new_v(int kind, int int_val, char *str_val);

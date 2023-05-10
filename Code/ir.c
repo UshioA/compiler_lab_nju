@@ -1,4 +1,5 @@
 #include "ir.h"
+#include "array.h"
 #include "list.h"
 #include "syntax.tab.h"
 #include <stdio.h>
@@ -8,6 +9,7 @@
 static int tempcnt;
 static int labelcnt;
 intercode *ircode;
+array *ir_list;
 
 operand *new_v(int kind, int int_val, char *str_val) {
   operand *opr = calloc(1, sizeof(operand));
@@ -154,7 +156,10 @@ intercode *new_write_ir(operand *from) {
   return ir;
 }
 
-void ir_pushback(intercode *p) { list_add_tail(&p->link, &ircode->link); }
+void ir_pushback(intercode *p) {
+  arr_push(ir_list, p);
+  // list_add_tail(&p->link, &ircode->link);
+}
 
 static void op_dump(operand *op, FILE *f) {
   if (op->ref) {
@@ -192,6 +197,8 @@ static void op_dump(operand *op, FILE *f) {
 
 void ir_dump(intercode *ir, FILE *f) {
   switch (ir->kind) {
+  case IR_PASS: {
+  } break;
   case IR_LABEL: {
     fprintf(f, "LABEL ");
     op_dump(ir->label.label, f);
@@ -284,4 +291,7 @@ void ir_dump(intercode *ir, FILE *f) {
   }
 }
 
-void init_ircode() { ircode = new_ir(); }
+void init_ircode() {
+  ir_list = new_arr(512);
+  // ircode = new_ir();
+}
