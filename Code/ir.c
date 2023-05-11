@@ -11,13 +11,14 @@ static int labelcnt;
 intercode *ircode;
 array *ir_list;
 
-operand *new_v(int kind, int int_val, char *str_val) {
+operand *new_v(int kind, int int_val, char *str_val, int no) {
   operand *opr = calloc(1, sizeof(operand));
   opr->kind = kind;
   if (OPR_TMP <= kind && kind <= OPR_SIZE) {
     opr->imm = int_val;
   } else if (OPR_VAR <= kind && kind <= OPR_FUNC) {
     opr->varname = str_val;
+    opr->varno = no;
   }
   return opr;
 }
@@ -28,12 +29,16 @@ static intercode *new_ir() {
   return ir;
 }
 
-operand *new_tempvar() { return new_v(OPR_TMP, tempcnt++, NULL); }
-operand *new_label() { return new_v(OPR_LABEL, labelcnt++, NULL); }
-operand *new_imm(int imm) { return new_v(OPR_IMM, imm, NULL); }
-operand *new_var(char *varname) { return new_v(OPR_VAR, -1, varname); }
-operand *new_size(int size) { return new_v(OPR_SIZE, size, NULL); }
-operand *new_func(char *funcname) { return new_v(OPR_FUNC, -1, funcname); }
+operand *new_tempvar() { return new_v(OPR_TMP, tempcnt++, NULL, 0); }
+operand *new_label() { return new_v(OPR_LABEL, labelcnt++, NULL, 0); }
+operand *new_imm(int imm) { return new_v(OPR_IMM, imm, NULL, 0); }
+operand *new_var(char *varname, int no) {
+  return new_v(OPR_VAR, -1, varname, no);
+}
+operand *new_size(int size) { return new_v(OPR_SIZE, size, NULL, 0); }
+operand *new_func(char *funcname, int no) {
+  return new_v(OPR_FUNC, -1, funcname, no);
+}
 
 intercode *new_label_ir(operand *label) {
   intercode *ir = new_ir();
@@ -172,15 +177,16 @@ static void op_dump(operand *op, FILE *f) {
     fprintf(f, "t%d", op->tempno);
   } break;
   case OPR_VAR: {
-    fprintf(f, "v%s", op->varname);
+    fprintf(f, "v%d", op->varno);
   } break;
   case OPR_LABEL: {
     fprintf(f, "l%d", op->imm);
   } break;
   case OPR_FUNC: {
-    if (strcmp(op->funcname, "main"))
-      fprintf(f, "f");
-    fprintf(f, "%s", op->funcname);
+    if (!strcmp(op->funcname, "main"))
+      fprintf(f, "main");
+    else
+      fprintf(f, "f%d", op->funcno);
   } break;
   case OPR_IMM: {
     fprintf(f, "#%d", op->imm);

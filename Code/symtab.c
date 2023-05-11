@@ -5,10 +5,12 @@
 #include "type.h"
 #include <assert.h>
 #include <stdint.h>
-
+int varno;
+int funcno;
 static symbol *_make_symbol(cmm_type *ctype, char *name, int ival, float fval,
                             uint32_t *dimension, int ftype) {
   symbol *sym = calloc(1, sizeof(symbol));
+  sym->hash = 0;
   sym->name = name;
   sym->type = ctype;
   if (ctype->is_basetype) {
@@ -18,7 +20,13 @@ static symbol *_make_symbol(cmm_type *ctype, char *name, int ival, float fval,
     } else if (btype->dectype == FLOAT) {
       sym->fval = fval;
     }
+    sym->no = varno++;
   } else { // only handle array, store dimensions
+    if (ctype->ctype == TYPE_FUNC) {
+      sym->no = funcno++;
+    } else {
+      sym->no = varno++;
+    }
     sym->dimension = dimension;
   }
   return sym;
@@ -93,9 +101,14 @@ symbol *symget(symtab *stab, char *name) {
   }
   return NULL;
 }
+
 void symset(symtab *stab, char *name, symbol *sym) {
-  uint32_t index = hash(name, strlen(name), stab->hsize);
-  sentry *se = stab->head[index];
+  uint32_t ha;
+  if (sym->hash)
+    ha = sym->hash;
+  else
+    ha = sym->hash = hash(name, strlen(name), stab->hsize);
+  sentry *se = stab->head[ha];
   if (!list_empty(&se->link)) {
     sentry *pos;
     list_entry *head = &se->link;

@@ -14,6 +14,7 @@ frame *currf; // this name is bad =)
 
 cmm_type *temphead;
 int semanerr;
+
 static char *randstr() {
   char alphabet[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
   char *target = calloc(9, sizeof(char));
@@ -220,7 +221,8 @@ static cmm_type *fundec(ast_node *root, cmm_type *rtype) {
     symbol *original = sym;
     ast_node *vlist = get_child_n(root, 2);
     cmm_type *ftype = new_cmm_ctype(TYPE_FUNC, rtype->btype);
-    cmm_type *_varlist = new_cmm_ctype(-1, rtype->btype);
+    cmm_type *_varlist =
+        new_cmm_ctype(-1, rtype->btype); //捏着鼻子看一下参数列表有没有错误
     varlist(vlist, _varlist);
     ctype_set_contain_type(ftype, _varlist);
     sym = make_funsymbol(_id->value.str_val, ftype);

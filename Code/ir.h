@@ -9,7 +9,7 @@
 
 #define __CMM_INT_SIZE__ 4
 
-typedef struct operand {
+typedef struct {
   enum {
     OPR_TMP,
     OPR_LABEL,
@@ -30,12 +30,18 @@ typedef struct operand {
     int tempno;
     int imm;
     int size;
-    char *varname;
-    char *funcname;
+    struct {
+      char *varname;
+      int varno;
+    };
+    struct {
+      char *funcname;
+      int funcno;
+    };
   };
 } operand;
 
-typedef struct _intercode {
+typedef struct {
   enum {
     IR_LABEL,
     IR_FUNCTION,
@@ -116,14 +122,14 @@ extern intercode *ircode;
 extern array *ir_list;
 
 void init_ircode();
-operand *new_v(int kind, int int_val, char *str_val);
+operand *new_v(int kind, int int_val, char *str_val, int no);
 operand *new_tempvar();
 operand *new_label();
 
 operand *new_imm(int imm);
-operand *new_var(char *varname);
+operand *new_var(char *varname, int no);
 operand *new_size(int size);
-operand *new_func(char *funcname);
+operand *new_func(char *funcname, int);
 
 intercode *new_label_ir(operand *label);
 intercode *new_func_ir(operand *funcname);

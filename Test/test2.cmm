@@ -5,6 +5,7 @@ return n;
 else
 return (n * fact(n - 1));
 }
+int what(){}
 int main()
 {
  int m, result;

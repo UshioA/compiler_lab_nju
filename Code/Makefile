@@ -43,6 +43,7 @@ clean:
 	rm -f $(OBJS) $(OBJS:.o=.d)
 	rm -f $(LFC) $(YFC) $(YFC:.c=.h)
 	rm -f *~
+	rm -f ../compile_commands.json
 
 clean-all: clean
 	rm -f ../parser

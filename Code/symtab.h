@@ -12,13 +12,17 @@
 
 typedef struct symbol { // variable, function, array, struct
   cmm_type *type;
-  char *name;
+  struct {
+    char *name;
+    int no;
+  };
   union {
     int ival;            // int type
     float fval;          // float type
     uint32_t *dimension; // use dimension[0] as len.
   };
   int is_arg;
+  uint32_t hash;
 } symbol;
 
 static inline uint32_t __fnv_hash(char *str, uint32_t length) {
