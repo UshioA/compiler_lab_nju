@@ -4,21 +4,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int map_num(int index) { return index / sizeof(uint64_t); }
-static int map_bit(int index) { return index % sizeof(uint64_t); }
+static uint32_t map_num(uint32_t index) { return index / (sizeof(uint64_t) << 3); }
+static uint32_t map_bit(uint32_t index) { return index % (sizeof(uint64_t) << 3); }
 
-static void bitset_setat(bitset *bs, int index, int value) {
+static void bitset_setat(bitset *bs, uint32_t index, uint32_t value) {
   int positive = value != 0;
   assert(index < bs->limit);
-  int numat = map_num(index);
-  int bitat = map_bit(index);
+  uint32_t numat = map_num(index);
+  uint32_t bitat = map_bit(index);
   if (positive) {
     bs->set[numat] |= (0x1ul << bitat);
   } else {
     bs->set[numat] &= (~(0x1ul << bitat));
   }
 }
-bitset *new_bitset(int limit) {
+bitset *new_bitset(uint32_t limit) {
   bitset *bs = (void *)calloc(1, sizeof(bitset));
   bs->limit = limit;
   bs->setlen = map_num(limit) + 1;
@@ -27,12 +27,12 @@ bitset *new_bitset(int limit) {
   return bs;
 }
 
-void bitset_insert(bitset *bs, int index) { bitset_setat(bs, index, 1); }
-void bitset_remove(bitset *bs, int index) { bitset_setat(bs, index, 0); }
-int bitset_contain(bitset *bs, int index) {
-  int numat = map_num(index);
-  int bitat = map_bit(index);
-  return bs->set[numat] & (0x1ul << bitat);
+void bitset_insert(bitset *bs, uint32_t index) { bitset_setat(bs, index, 1); }
+void bitset_remove(bitset *bs, uint32_t index) { bitset_setat(bs, index, 0); }
+uint64_t bitset_contain(bitset *bs, uint32_t index) {
+  uint32_t numat = map_num(index);
+  uint32_t bitat = map_bit(index);
+  return ((bs->set[numat]) & (0x1ul << bitat));
 }
 int bitset_eq(bitset *b1, bitset *b2) {
   if (b1->limit != b2->limit)

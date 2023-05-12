@@ -37,6 +37,9 @@ void emit_code(intercode *ir) { ir_pushback(ir); }
 
 void dump_code() {
   for (int i = 0; i < ir_list->length; ++i) {
+#ifdef __DEBUG_IR_LINENO__
+    printf("\033[32m[%d]: \033[0m", i);
+#endif
     ir_dump(ir_list->elem[i], f);
   }
 }

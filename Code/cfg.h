@@ -4,11 +4,13 @@
 #include "array.h"
 #include "basic_blk.h"
 #define DEFAULT_NODE_NUM 256
+extern const int writeno, readno;
 typedef struct {
   array *adj;  // adjacency list
   array *radj; // reverse adjacency list
   array *node; // basic blocks
   int funid;
+  int reachable;
 } cfg;
 extern int varno;
 extern int funcno;
@@ -29,4 +31,7 @@ array *make_func_blk();
 array *make_node_list(int beg, int end);
 array *make_node_lists(array *funclist);
 void build_cfg(array *nodelist_list);
+
+void cfg_dump(FILE* f, cfg* g);
+void adj_dump(FILE* f, array* adj);
 #endif

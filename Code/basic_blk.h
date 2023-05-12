@@ -2,6 +2,7 @@
 #define __CMM_BASIC_BLK_H__
 
 #include "array.h"
+#include <stdio.h>
 extern array *ir_list;
 
 typedef struct BB {
@@ -16,4 +17,5 @@ BB *new_bb(int blkid, int beg, int end, int kind);
 BB *new_bb_node(int blkid, int beg, int end);
 BB *new_bb_entry(int blkid);
 BB *new_bb_exit(int blkid);
+void bb_dump(FILE *f, BB *b);
 #endif

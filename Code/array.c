@@ -16,6 +16,11 @@ void *arr_get(int idx, array *arr) {
   return NULL;
 }
 
+void arr_set(int idx, void *val, array *arr) {
+  assert(idx < arr->length && idx >= 0);
+  arr->elem[idx] = val;
+}
+
 static void arr_resize(array *arr) {
   arr->elem = realloc(arr->elem, (arr->capacity << 1) * sizeof(void *));
   assert(arr->elem);

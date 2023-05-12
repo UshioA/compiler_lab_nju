@@ -8,4 +8,5 @@ int main(){
   write(-m[0][1]);
   write(-m[1][0]);
   write(-m[1][1]);
+  return 0;
 }

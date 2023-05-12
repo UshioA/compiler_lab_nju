@@ -1,4 +1,6 @@
+#include "array.h"
 #include "ast.h"
+#include "cfg.h"
 #include "ir.h"
 #include "semantic.h"
 #include "syntax.tab.h"
@@ -32,6 +34,12 @@ int main(int argc, char **argv) {
           ff = fopen(argv[2], "w");
         init_file(ff);
         dump_code();
+        init_cfg_list();
+        array *fl = make_func_blk();
+        build_cfg(make_node_lists(fl));
+        for (int i = 0; i < cfg_list->length; ++i) {
+          cfg_dump(stdout, arr_get(i, cfg_list));
+        }
       }
     }
   }
