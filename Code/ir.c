@@ -166,7 +166,7 @@ void ir_pushback(intercode *p) {
   // list_add_tail(&p->link, &ircode->link);
 }
 
-static void op_dump(operand *op, FILE *f) {
+void op_dump(operand *op, FILE *f) {
   if (op->ref) {
     fprintf(f, "&");
   } else if (op->deref) {
@@ -177,7 +177,7 @@ static void op_dump(operand *op, FILE *f) {
     fprintf(f, "t%d", op->tempno);
   } break;
   case OPR_VAR: {
-    fprintf(f, "v%d", op->varno);
+    fprintf(f, "v%s", op->varname);
   } break;
   case OPR_LABEL: {
     fprintf(f, "l%d", op->imm);
@@ -186,7 +186,7 @@ static void op_dump(operand *op, FILE *f) {
     if (!strcmp(op->funcname, "main"))
       fprintf(f, "main");
     else
-      fprintf(f, "f%d", op->funcno);
+      fprintf(f, "f%s", op->funcname);
   } break;
   case OPR_IMM: {
     fprintf(f, "#%d", op->imm);

@@ -82,6 +82,9 @@ array *make_func_blk() {
     intercode *ir = ir_list->elem[i];
     if (ir->kind == IR_FUNCTION) {
       arr_push(func_head_list, (void *)((uint64_t)i));
+      if (!strcmp(ir->func.func->funcname, "main")) {
+        arr_set(ir->func.func->funcno, (void *)1, reachable);
+      }
     }
   }
   arr_push(func_head_list, (void *)(uint64_t)ir_list->length);
@@ -150,10 +153,6 @@ array *make_node_list(int beg, int end) {
       arr_push(nodelist, new_bb_node(++nodeid, at, ed));
   }
   arr_push(nodelist, new_bb_exit(++nodeid));
-  // for (int i = 0; i < nodelist->length; ++i) {
-  //   BB *b = nodelist->elem[i];
-  //   bb_dump(stdout, b);
-  // }
   return nodelist;
 }
 
@@ -175,7 +174,7 @@ void build_cfg(array *nodelist_list) {
   // reserved for READ and WRITE, no cfg so mark NULL
   cfg_list->elem[0] = cfg_list->elem[1] = NULL;
   for (int i = 0; i < nodelist_list->length; ++i) {
-    if (!(uint64_t)arr_get(i, reachable))
+    if (!(uint64_t)arr_get(i+2, reachable))
       continue;
     array *nl = arr_get(i, nodelist_list);
     cfg *g = arr_get(i + 2, cfg_list);

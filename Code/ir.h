@@ -148,6 +148,6 @@ intercode *new_read_ir(operand *to);
 intercode *new_write_ir(operand *from);
 
 void ir_pushback(intercode *);
-
+void op_dump(operand *op, FILE *f);
 void ir_dump(intercode *p, FILE *f);
 #endif

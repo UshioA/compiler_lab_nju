@@ -1,7 +1,11 @@
 #ifndef __CMM_MIPS_H__
 #define __CMM_MIPS_H__
 
+#include "ir.h"
 #include "list.h"
+
+#define __MIPS_REG_LIMIT__ 32
+
 enum mips_reg {
   REG_ZE = 0,
   REG_AT,
@@ -40,8 +44,8 @@ enum mips_reg {
 typedef struct mips_op {
   enum { MIPS_OP_LABEL, MIPS_OP_REG, MIPS_OP_IMM, MIPS_OP_ADDR } kind;
   union {
-    int value;   // for imm
-    char *label; // for LABEL
+    int value; // for imm
+    int labelno;
     struct {
       // if REG, use `reg', else if ADDR, use `reg' and `offset'
       enum mips_reg reg;
@@ -52,21 +56,24 @@ typedef struct mips_op {
 
 typedef struct mips_inst {
   enum {
+    // one op
     MIPS_LABEL,
+    MIPS_JAL,
+    MIPS_J,
+    MIPS_MFLO,
+    MIPS_JR,
+    // two op
     MIPS_LI,
-    MIPS_LA,
     MIPS_MOVE,
+    MIPS_DIV,
+    MIPS_LW,
+    MIPS_SW,
+    MIPS_LA,
+    // three op
     MIPS_ADD,
     MIPS_ADDI,
     MIPS_SUB,
     MIPS_MUL,
-    MIPS_DIV,
-    MIPS_MFLO,
-    MIPS_LW,
-    MIPS_SW,
-    MIPS_J,
-    MIPS_JAL,
-    MIPS_JR,
     MIPS_BEQ,
     MIPS_BNE,
     MIPS_BGT,
@@ -85,12 +92,44 @@ typedef struct mips_inst {
   };
 } mips_inst;
 
-mips_op *new_mips_op(int kind, int value, char *label, int reg, int offset);
-mips_op *new_label_op(char *label);
+typedef struct {
+  operand *op; // corresponding operand
+  int offset;
+  int regno;
+  list_entry link;
+  // my dear list library =). actually i thought about using newly implemented
+  // array, nonetheless my array library can only be pushed and i dont think
+  // it's worthy to implement `pop' and `shrink' since i am lazy. so i just
+  // stick to my dear old list library =)
+} var_desc;
+
+typedef struct {
+  enum mips_reg kind;
+  enum {
+    REG_FREE,
+    REG_BUSY,
+  } state;
+  var_desc* hang;
+} reg_desc;
+
+const char *get_reg_name(int regno);
+
+mips_op *new_mips_op(int kind, int value, int labelno, int reg, int offset);
+mips_op *new_label_op(int labelno);
 mips_op *new_reg_op(int reg);
 mips_op *new_imm_op(int value);
 mips_op *new_addr_op(int reg, int offset);
 
-extern const mips_op reg_op[32];
+void init_codefile(FILE*);
+void gencode();
+void init_env();
+
+extern const mips_op reg_op[__MIPS_REG_LIMIT__];
 extern mips_inst *mips_head;
+extern const char *reg_names[__MIPS_REG_LIMIT__];
+extern var_desc curr_varlist;
+extern int local_offset;
+extern int argnum;
+extern int paramnum;
+
 #endif

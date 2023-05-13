@@ -11,7 +11,6 @@
 #include <time.h>
 frame *global;
 frame *currf; // this name is bad =)
-
 cmm_type *temphead;
 int semanerr;
 

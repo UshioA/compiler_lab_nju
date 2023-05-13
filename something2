@@ -1,0 +1,1203 @@
+.data
+_prompt: .asciiz "Enter an integer:"
+_ret: .asciiz "\n"
+.globl main
+.text
+f1:
+li $v0, 4
+la $a0, _prompt
+syscall
+li $v0, 5
+syscall
+jr $ra
+f0:
+li $v0, 1
+syscall
+li $v0, 4
+la $a0, _ret
+syscall
+move $v0, $0
+jr $ra
+fmax:
+move $fp, $sp
+addu $sp, $sp, -16
+lw $t0, -4($fp)
+lw $t1, 8($fp)
+move $t0, $t1
+sw $t0, -4($fp)
+lw $t0, -8($fp)
+lw $t1, 12($fp)
+move $t0, $t1
+sw $t0, -8($fp)
+lw $t0, -4($fp)
+lw $t1, -8($fp)
+bge, $t0, $t1, l0
+j l1
+l0:
+lw $t0, -12($fp)
+lw $t1, 8($fp)
+move $t0, $t1
+sw $t0, -12($fp)
+lw $t0, -12($fp)
+move $v0, $t0
+jr $ra
+j l2
+l1:
+lw $t0, -16($fp)
+lw $t1, 12($fp)
+move $t0, $t1
+sw $t0, -16($fp)
+lw $t0, -16($fp)
+move $v0, $t0
+jr $ra
+l2:
+fknapsack:
+move $fp, $sp
+addu $sp, $sp, -160436
+lw $t0, -160004($fp)
+li $t1, 0
+move $t0, $t1
+sw $t0, -160004($fp)
+lw $t0, -160008($fp)
+lw $t1, -160004($fp)
+move $t0, $t1
+sw $t0, -160008($fp)
+lw $t0, -160012($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160012($fp)
+l3:
+lw $t0, -160016($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160016($fp)
+lw $t0, -160020($fp)
+lw $t1, 8($fp)
+move $t0, $t1
+sw $t0, -160020($fp)
+lw $t0, -160016($fp)
+lw $t1, -160020($fp)
+ble, $t0, $t1, l4
+j l5
+l4:
+lw $t0, -160024($fp)
+addu $t1, $fp, -160000
+move $t0, $t1
+sw $t0, -160024($fp)
+lw $t0, -160028($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160028($fp)
+lw $t1, -160028($fp)
+li $t2, 800
+mul $t0, $t1, $t2
+sw $t0, -160028($fp)
+lw $t1, -160024($fp)
+lw $t2, -160028($fp)
+add $t0, $t1, $t2
+sw $t0, -160024($fp)
+li $t1, 4
+li $t2, 0
+mul $t0, $t1, $t2
+sw $t0, -160028($fp)
+lw $t1, -160024($fp)
+lw $t2, -160028($fp)
+add $t0, $t1, $t2
+sw $t0, -160024($fp)
+lw $t0, -160032($fp)
+li $t1, 0
+move $t0, $t1
+sw $t0, -160032($fp)
+lw $t0, -160024($fp)
+lw $t1, -160032($fp)
+sw $t1, 0($t0)
+lw $t1, -160024($fp)
+lw $t0, 0($t1)
+sw $t0, -160036($fp)
+lw $t0, -160040($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160040($fp)
+lw $t0, -160044($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160044($fp)
+lw $t1, -160040($fp)
+lw $t2, -160044($fp)
+add $t0, $t1, $t2
+sw $t0, -160048($fp)
+lw $t0, -160008($fp)
+lw $t1, -160048($fp)
+move $t0, $t1
+sw $t0, -160008($fp)
+lw $t0, -160052($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160052($fp)
+j l3
+l5:
+lw $t0, -160056($fp)
+li $t1, 0
+move $t0, $t1
+sw $t0, -160056($fp)
+lw $t0, -160060($fp)
+lw $t1, -160056($fp)
+move $t0, $t1
+sw $t0, -160060($fp)
+lw $t0, -160064($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160064($fp)
+l6:
+lw $t0, -160068($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160068($fp)
+lw $t0, -160072($fp)
+lw $t1, 24($fp)
+move $t0, $t1
+sw $t0, -160072($fp)
+lw $t0, -160068($fp)
+lw $t1, -160072($fp)
+ble, $t0, $t1, l7
+j l8
+l7:
+lw $t0, -160076($fp)
+addu $t1, $fp, -160000
+move $t0, $t1
+sw $t0, -160076($fp)
+li $t1, 800
+li $t2, 0
+mul $t0, $t1, $t2
+sw $t0, -160080($fp)
+lw $t1, -160076($fp)
+lw $t2, -160080($fp)
+add $t0, $t1, $t2
+sw $t0, -160076($fp)
+lw $t0, -160080($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160080($fp)
+lw $t1, -160080($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160080($fp)
+lw $t1, -160076($fp)
+lw $t2, -160080($fp)
+add $t0, $t1, $t2
+sw $t0, -160076($fp)
+lw $t0, -160084($fp)
+li $t1, 0
+move $t0, $t1
+sw $t0, -160084($fp)
+lw $t0, -160076($fp)
+lw $t1, -160084($fp)
+sw $t1, 0($t0)
+lw $t1, -160076($fp)
+lw $t0, 0($t1)
+sw $t0, -160088($fp)
+lw $t0, -160092($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160092($fp)
+lw $t0, -160096($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160096($fp)
+lw $t1, -160092($fp)
+lw $t2, -160096($fp)
+add $t0, $t1, $t2
+sw $t0, -160100($fp)
+lw $t0, -160060($fp)
+lw $t1, -160100($fp)
+move $t0, $t1
+sw $t0, -160060($fp)
+lw $t0, -160104($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160104($fp)
+j l6
+l8:
+lw $t0, -160108($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160108($fp)
+lw $t0, -160008($fp)
+lw $t1, -160108($fp)
+move $t0, $t1
+sw $t0, -160008($fp)
+lw $t0, -160112($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160112($fp)
+l9:
+lw $t0, -160116($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160116($fp)
+lw $t0, -160120($fp)
+lw $t1, 8($fp)
+move $t0, $t1
+sw $t0, -160120($fp)
+lw $t0, -160116($fp)
+lw $t1, -160120($fp)
+ble, $t0, $t1, l10
+j l11
+l10:
+lw $t0, -160124($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160124($fp)
+lw $t0, -160060($fp)
+lw $t1, -160124($fp)
+move $t0, $t1
+sw $t0, -160060($fp)
+lw $t0, -160128($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160128($fp)
+l12:
+lw $t0, -160132($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160132($fp)
+lw $t0, -160136($fp)
+lw $t1, 24($fp)
+move $t0, $t1
+sw $t0, -160136($fp)
+lw $t0, -160132($fp)
+lw $t1, -160136($fp)
+ble, $t0, $t1, l13
+j l14
+l13:
+lw $t0, -160140($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160140($fp)
+lw $t0, -160144($fp)
+lw $t1, 12($fp)
+move $t0, $t1
+sw $t0, -160144($fp)
+lw $t0, -160148($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160148($fp)
+lw $t0, -160152($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160152($fp)
+lw $t1, -160148($fp)
+lw $t2, -160152($fp)
+sub $t0, $t1, $t2
+sw $t0, -160156($fp)
+lw $t1, -160156($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160156($fp)
+lw $t1, -160144($fp)
+lw $t2, -160156($fp)
+add $t0, $t1, $t2
+sw $t0, -160144($fp)
+lw $t1, -160144($fp)
+lw $t0, 0($t1)
+sw $t0, -160144($fp)
+lw $t0, -160140($fp)
+lw $t1, -160144($fp)
+blt, $t0, $t1, l15
+j l16
+l15:
+lw $t0, -160160($fp)
+addu $t1, $fp, -160000
+move $t0, $t1
+sw $t0, -160160($fp)
+lw $t0, -160164($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160164($fp)
+lw $t1, -160164($fp)
+li $t2, 800
+mul $t0, $t1, $t2
+sw $t0, -160164($fp)
+lw $t1, -160160($fp)
+lw $t2, -160164($fp)
+add $t0, $t1, $t2
+sw $t0, -160160($fp)
+lw $t0, -160164($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160164($fp)
+lw $t1, -160164($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160164($fp)
+lw $t1, -160160($fp)
+lw $t2, -160164($fp)
+add $t0, $t1, $t2
+sw $t0, -160160($fp)
+lw $t0, -160168($fp)
+addu $t1, $fp, -160000
+move $t0, $t1
+sw $t0, -160168($fp)
+lw $t0, -160172($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160172($fp)
+lw $t0, -160176($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160176($fp)
+lw $t1, -160172($fp)
+lw $t2, -160176($fp)
+sub $t0, $t1, $t2
+sw $t0, -160180($fp)
+lw $t1, -160180($fp)
+li $t2, 800
+mul $t0, $t1, $t2
+sw $t0, -160180($fp)
+lw $t1, -160168($fp)
+lw $t2, -160180($fp)
+add $t0, $t1, $t2
+sw $t0, -160168($fp)
+lw $t0, -160180($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160180($fp)
+lw $t1, -160180($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160180($fp)
+lw $t1, -160168($fp)
+lw $t2, -160180($fp)
+add $t0, $t1, $t2
+sw $t0, -160168($fp)
+lw $t1, -160168($fp)
+lw $t0, 0($t1)
+sw $t0, -160168($fp)
+lw $t0, -160160($fp)
+lw $t1, -160168($fp)
+sw $t1, 0($t0)
+lw $t1, -160160($fp)
+lw $t0, 0($t1)
+sw $t0, -160184($fp)
+j l17
+l16:
+lw $t0, -160188($fp)
+addu $t1, $fp, -160000
+move $t0, $t1
+sw $t0, -160188($fp)
+lw $t0, -160192($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160192($fp)
+lw $t1, -160192($fp)
+li $t2, 800
+mul $t0, $t1, $t2
+sw $t0, -160192($fp)
+lw $t1, -160188($fp)
+lw $t2, -160192($fp)
+add $t0, $t1, $t2
+sw $t0, -160188($fp)
+lw $t0, -160192($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160192($fp)
+lw $t1, -160192($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160192($fp)
+lw $t1, -160188($fp)
+lw $t2, -160192($fp)
+add $t0, $t1, $t2
+sw $t0, -160188($fp)
+lw $t0, -160196($fp)
+addu $t1, $fp, -160000
+move $t0, $t1
+sw $t0, -160196($fp)
+lw $t0, -160200($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160200($fp)
+lw $t0, -160204($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160204($fp)
+lw $t1, -160200($fp)
+lw $t2, -160204($fp)
+sub $t0, $t1, $t2
+sw $t0, -160208($fp)
+lw $t1, -160208($fp)
+li $t2, 800
+mul $t0, $t1, $t2
+sw $t0, -160208($fp)
+lw $t1, -160196($fp)
+lw $t2, -160208($fp)
+add $t0, $t1, $t2
+sw $t0, -160196($fp)
+lw $t0, -160208($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160208($fp)
+lw $t1, -160208($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160208($fp)
+lw $t1, -160196($fp)
+lw $t2, -160208($fp)
+add $t0, $t1, $t2
+sw $t0, -160196($fp)
+lw $t1, -160196($fp)
+lw $t0, 0($t1)
+sw $t0, -160196($fp)
+lw $t0, -160212($fp)
+addu $t1, $fp, -160000
+move $t0, $t1
+sw $t0, -160212($fp)
+lw $t0, -160216($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160216($fp)
+lw $t0, -160220($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160220($fp)
+lw $t1, -160216($fp)
+lw $t2, -160220($fp)
+sub $t0, $t1, $t2
+sw $t0, -160224($fp)
+lw $t1, -160224($fp)
+li $t2, 800
+mul $t0, $t1, $t2
+sw $t0, -160224($fp)
+lw $t1, -160212($fp)
+lw $t2, -160224($fp)
+add $t0, $t1, $t2
+sw $t0, -160212($fp)
+lw $t0, -160228($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160228($fp)
+lw $t0, -160232($fp)
+lw $t1, 12($fp)
+move $t0, $t1
+sw $t0, -160232($fp)
+lw $t0, -160236($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160236($fp)
+lw $t0, -160240($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160240($fp)
+lw $t1, -160236($fp)
+lw $t2, -160240($fp)
+sub $t0, $t1, $t2
+sw $t0, -160244($fp)
+lw $t1, -160244($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160244($fp)
+lw $t1, -160232($fp)
+lw $t2, -160244($fp)
+add $t0, $t1, $t2
+sw $t0, -160232($fp)
+lw $t1, -160232($fp)
+lw $t0, 0($t1)
+sw $t0, -160232($fp)
+lw $t1, -160228($fp)
+lw $t2, -160232($fp)
+sub $t0, $t1, $t2
+sw $t0, -160224($fp)
+lw $t1, -160224($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160224($fp)
+lw $t1, -160212($fp)
+lw $t2, -160224($fp)
+add $t0, $t1, $t2
+sw $t0, -160212($fp)
+lw $t0, -160248($fp)
+lw $t1, 16($fp)
+move $t0, $t1
+sw $t0, -160248($fp)
+lw $t0, -160252($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160252($fp)
+lw $t0, -160256($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160256($fp)
+lw $t1, -160252($fp)
+lw $t2, -160256($fp)
+sub $t0, $t1, $t2
+sw $t0, -160260($fp)
+lw $t1, -160260($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160260($fp)
+lw $t1, -160248($fp)
+lw $t2, -160260($fp)
+add $t0, $t1, $t2
+sw $t0, -160248($fp)
+lw $t1, -160212($fp)
+lw $t0, 0($t1)
+sw $t0, -160212($fp)
+lw $t1, -160248($fp)
+lw $t0, 0($t1)
+sw $t0, -160248($fp)
+lw $t1, -160212($fp)
+lw $t2, -160248($fp)
+add $t0, $t1, $t2
+sw $t0, -160264($fp)
+lw $t0, -160264($fp)
+addu $sp, $sp, -4
+sw $t0, 0($sp)
+lw $t0, -160196($fp)
+addu $sp, $sp, -4
+sw $t0, 0($sp)
+addu $sp, $sp, -8
+sw $fp, 0($sp)
+sw $ra, 4($sp)
+jal fmax
+move $sp, $fp
+lw $ra, 4($sp)
+lw $fp, 0($sp)
+addu $sp, $sp, 16
+move $t0, $v0
+sw $t0, -160268($fp)
+lw $t0, -160188($fp)
+lw $t1, -160268($fp)
+sw $t1, 0($t0)
+lw $t1, -160188($fp)
+lw $t0, 0($t1)
+sw $t0, -160272($fp)
+l17:
+lw $t0, -160276($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160276($fp)
+lw $t0, -160280($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160280($fp)
+lw $t1, -160276($fp)
+lw $t2, -160280($fp)
+add $t0, $t1, $t2
+sw $t0, -160284($fp)
+lw $t0, -160060($fp)
+lw $t1, -160284($fp)
+move $t0, $t1
+sw $t0, -160060($fp)
+lw $t0, -160288($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160288($fp)
+j l12
+l14:
+lw $t0, -160292($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160292($fp)
+lw $t0, -160296($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160296($fp)
+lw $t1, -160292($fp)
+lw $t2, -160296($fp)
+add $t0, $t1, $t2
+sw $t0, -160300($fp)
+lw $t0, -160008($fp)
+lw $t1, -160300($fp)
+move $t0, $t1
+sw $t0, -160008($fp)
+lw $t0, -160304($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160304($fp)
+j l9
+l11:
+lw $t0, -160308($fp)
+lw $t1, 24($fp)
+move $t0, $t1
+sw $t0, -160308($fp)
+lw $t0, -160060($fp)
+lw $t1, -160308($fp)
+move $t0, $t1
+sw $t0, -160060($fp)
+lw $t0, -160312($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160312($fp)
+lw $t0, -160316($fp)
+lw $t1, 8($fp)
+move $t0, $t1
+sw $t0, -160316($fp)
+lw $t0, -160008($fp)
+lw $t1, -160316($fp)
+move $t0, $t1
+sw $t0, -160008($fp)
+lw $t0, -160320($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160320($fp)
+l18:
+lw $t0, -160324($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160324($fp)
+lw $t0, -160328($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160328($fp)
+lw $t0, -160324($fp)
+lw $t1, -160328($fp)
+bge, $t0, $t1, l19
+j l20
+l19:
+lw $t0, -160332($fp)
+addu $t1, $fp, -160000
+move $t0, $t1
+sw $t0, -160332($fp)
+lw $t0, -160336($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160336($fp)
+lw $t1, -160336($fp)
+li $t2, 800
+mul $t0, $t1, $t2
+sw $t0, -160336($fp)
+lw $t1, -160332($fp)
+lw $t2, -160336($fp)
+add $t0, $t1, $t2
+sw $t0, -160332($fp)
+lw $t0, -160336($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160336($fp)
+lw $t1, -160336($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160336($fp)
+lw $t1, -160332($fp)
+lw $t2, -160336($fp)
+add $t0, $t1, $t2
+sw $t0, -160332($fp)
+lw $t0, -160340($fp)
+addu $t1, $fp, -160000
+move $t0, $t1
+sw $t0, -160340($fp)
+lw $t0, -160344($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160344($fp)
+lw $t0, -160348($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160348($fp)
+lw $t1, -160344($fp)
+lw $t2, -160348($fp)
+sub $t0, $t1, $t2
+sw $t0, -160352($fp)
+lw $t1, -160352($fp)
+li $t2, 800
+mul $t0, $t1, $t2
+sw $t0, -160352($fp)
+lw $t1, -160340($fp)
+lw $t2, -160352($fp)
+add $t0, $t1, $t2
+sw $t0, -160340($fp)
+lw $t0, -160352($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160352($fp)
+lw $t1, -160352($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160352($fp)
+lw $t1, -160340($fp)
+lw $t2, -160352($fp)
+add $t0, $t1, $t2
+sw $t0, -160340($fp)
+lw $t1, -160332($fp)
+lw $t0, 0($t1)
+sw $t0, -160332($fp)
+lw $t1, -160340($fp)
+lw $t0, 0($t1)
+sw $t0, -160340($fp)
+lw $t0, -160332($fp)
+lw $t1, -160340($fp)
+bgt, $t0, $t1, l21
+j l22
+l21:
+lw $t0, -160356($fp)
+lw $t1, 20($fp)
+move $t0, $t1
+sw $t0, -160356($fp)
+lw $t0, -160360($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160360($fp)
+lw $t1, -160360($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160360($fp)
+lw $t1, -160356($fp)
+lw $t2, -160360($fp)
+add $t0, $t1, $t2
+sw $t0, -160356($fp)
+lw $t0, -160364($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160364($fp)
+lw $t0, -160356($fp)
+lw $t1, -160364($fp)
+sw $t1, 0($t0)
+lw $t1, -160356($fp)
+lw $t0, 0($t1)
+sw $t0, -160368($fp)
+lw $t0, -160372($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160372($fp)
+lw $t0, -160376($fp)
+lw $t1, 12($fp)
+move $t0, $t1
+sw $t0, -160376($fp)
+lw $t0, -160380($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160380($fp)
+lw $t0, -160384($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160384($fp)
+lw $t1, -160380($fp)
+lw $t2, -160384($fp)
+sub $t0, $t1, $t2
+sw $t0, -160388($fp)
+lw $t1, -160388($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160388($fp)
+lw $t1, -160376($fp)
+lw $t2, -160388($fp)
+add $t0, $t1, $t2
+sw $t0, -160376($fp)
+lw $t1, -160376($fp)
+lw $t0, 0($t1)
+sw $t0, -160376($fp)
+lw $t1, -160372($fp)
+lw $t2, -160376($fp)
+sub $t0, $t1, $t2
+sw $t0, -160392($fp)
+lw $t0, -160060($fp)
+lw $t1, -160392($fp)
+move $t0, $t1
+sw $t0, -160060($fp)
+lw $t0, -160396($fp)
+lw $t1, -160060($fp)
+move $t0, $t1
+sw $t0, -160396($fp)
+j l23
+l22:
+lw $t0, -160400($fp)
+lw $t1, 20($fp)
+move $t0, $t1
+sw $t0, -160400($fp)
+lw $t0, -160404($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160404($fp)
+lw $t1, -160404($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160404($fp)
+lw $t1, -160400($fp)
+lw $t2, -160404($fp)
+add $t0, $t1, $t2
+sw $t0, -160400($fp)
+lw $t0, -160408($fp)
+li $t1, 0
+move $t0, $t1
+sw $t0, -160408($fp)
+lw $t0, -160400($fp)
+lw $t1, -160408($fp)
+sw $t1, 0($t0)
+lw $t1, -160400($fp)
+lw $t0, 0($t1)
+sw $t0, -160412($fp)
+l23:
+lw $t0, -160416($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160416($fp)
+lw $t0, -160420($fp)
+li $t1, 1
+move $t0, $t1
+sw $t0, -160420($fp)
+lw $t1, -160416($fp)
+lw $t2, -160420($fp)
+sub $t0, $t1, $t2
+sw $t0, -160424($fp)
+lw $t0, -160008($fp)
+lw $t1, -160424($fp)
+move $t0, $t1
+sw $t0, -160008($fp)
+lw $t0, -160428($fp)
+lw $t1, -160008($fp)
+move $t0, $t1
+sw $t0, -160428($fp)
+j l18
+l20:
+lw $t0, -160432($fp)
+addu $t1, $fp, -160000
+move $t0, $t1
+sw $t0, -160432($fp)
+lw $t0, -160436($fp)
+lw $t1, 8($fp)
+move $t0, $t1
+sw $t0, -160436($fp)
+lw $t1, -160436($fp)
+li $t2, 800
+mul $t0, $t1, $t2
+sw $t0, -160436($fp)
+lw $t1, -160432($fp)
+lw $t2, -160436($fp)
+add $t0, $t1, $t2
+sw $t0, -160432($fp)
+lw $t0, -160436($fp)
+lw $t1, 24($fp)
+move $t0, $t1
+sw $t0, -160436($fp)
+lw $t1, -160436($fp)
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -160436($fp)
+lw $t1, -160432($fp)
+lw $t2, -160436($fp)
+add $t0, $t1, $t2
+sw $t0, -160432($fp)
+lw $t1, -160432($fp)
+lw $t0, 0($t1)
+sw $t0, -160432($fp)
+lw $t0, -160432($fp)
+move $v0, $t0
+jr $ra
+main:
+move $fp, $sp
+addu $sp, $sp, -404
+lw $t0, -184($fp)
+li $t1, 10
+move $t0, $t1
+sw $t0, -184($fp)
+lw $t0, -188($fp)
+lw $t1, -184($fp)
+move $t0, $t1
+sw $t0, -188($fp)
+lw $t0, -192($fp)
+lw $t1, -188($fp)
+move $t0, $t1
+sw $t0, -192($fp)
+lw $t0, -196($fp)
+li $t1, 5
+move $t0, $t1
+sw $t0, -196($fp)
+lw $t0, -200($fp)
+lw $t1, -196($fp)
+move $t0, $t1
+sw $t0, -200($fp)
+lw $t0, -204($fp)
+lw $t1, -200($fp)
+move $t0, $t1
+sw $t0, -204($fp)
+lw $t0, -208($fp)
+addu $t1, $fp, -60
+move $t0, $t1
+sw $t0, -208($fp)
+li $t1, 4
+li $t2, 0
+mul $t0, $t1, $t2
+sw $t0, -212($fp)
+lw $t1, -208($fp)
+lw $t2, -212($fp)
+add $t0, $t1, $t2
+sw $t0, -208($fp)
+lw $t0, -216($fp)
+li $t1, 2
+move $t0, $t1
+sw $t0, -216($fp)
+lw $t0, -208($fp)
+lw $t1, -216($fp)
+sw $t1, 0($t0)
+lw $t1, -208($fp)
+lw $t0, 0($t1)
+sw $t0, -220($fp)
+lw $t0, -224($fp)
+addu $t1, $fp, -60
+move $t0, $t1
+sw $t0, -224($fp)
+li $t1, 4
+li $t2, 1
+mul $t0, $t1, $t2
+sw $t0, -228($fp)
+lw $t1, -224($fp)
+lw $t2, -228($fp)
+add $t0, $t1, $t2
+sw $t0, -224($fp)
+lw $t0, -232($fp)
+li $t1, 2
+move $t0, $t1
+sw $t0, -232($fp)
+lw $t0, -224($fp)
+lw $t1, -232($fp)
+sw $t1, 0($t0)
+lw $t1, -224($fp)
+lw $t0, 0($t1)
+sw $t0, -236($fp)
+lw $t0, -240($fp)
+addu $t1, $fp, -60
+move $t0, $t1
+sw $t0, -240($fp)
+li $t1, 4
+li $t2, 2
+mul $t0, $t1, $t2
+sw $t0, -244($fp)
+lw $t1, -240($fp)
+lw $t2, -244($fp)
+add $t0, $t1, $t2
+sw $t0, -240($fp)
+lw $t0, -248($fp)
+li $t1, 6
+move $t0, $t1
+sw $t0, -248($fp)
+lw $t0, -240($fp)
+lw $t1, -248($fp)
+sw $t1, 0($t0)
+lw $t1, -240($fp)
+lw $t0, 0($t1)
+sw $t0, -252($fp)
+lw $t0, -256($fp)
+addu $t1, $fp, -60
+move $t0, $t1
+sw $t0, -256($fp)
+li $t1, 4
+li $t2, 3
+mul $t0, $t1, $t2
+sw $t0, -260($fp)
+lw $t1, -256($fp)
+lw $t2, -260($fp)
+add $t0, $t1, $t2
+sw $t0, -256($fp)
+lw $t0, -264($fp)
+li $t1, 5
+move $t0, $t1
+sw $t0, -264($fp)
+lw $t0, -256($fp)
+lw $t1, -264($fp)
+sw $t1, 0($t0)
+lw $t1, -256($fp)
+lw $t0, 0($t1)
+sw $t0, -268($fp)
+lw $t0, -272($fp)
+addu $t1, $fp, -60
+move $t0, $t1
+sw $t0, -272($fp)
+li $t1, 4
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -276($fp)
+lw $t1, -272($fp)
+lw $t2, -276($fp)
+add $t0, $t1, $t2
+sw $t0, -272($fp)
+lw $t0, -280($fp)
+li $t1, 4
+move $t0, $t1
+sw $t0, -280($fp)
+lw $t0, -272($fp)
+lw $t1, -280($fp)
+sw $t1, 0($t0)
+lw $t1, -272($fp)
+lw $t0, 0($t1)
+sw $t0, -284($fp)
+lw $t0, -288($fp)
+addu $t1, $fp, -120
+move $t0, $t1
+sw $t0, -288($fp)
+li $t1, 4
+li $t2, 0
+mul $t0, $t1, $t2
+sw $t0, -292($fp)
+lw $t1, -288($fp)
+lw $t2, -292($fp)
+add $t0, $t1, $t2
+sw $t0, -288($fp)
+lw $t0, -296($fp)
+li $t1, 6
+move $t0, $t1
+sw $t0, -296($fp)
+lw $t0, -288($fp)
+lw $t1, -296($fp)
+sw $t1, 0($t0)
+lw $t1, -288($fp)
+lw $t0, 0($t1)
+sw $t0, -300($fp)
+lw $t0, -304($fp)
+addu $t1, $fp, -120
+move $t0, $t1
+sw $t0, -304($fp)
+li $t1, 4
+li $t2, 1
+mul $t0, $t1, $t2
+sw $t0, -308($fp)
+lw $t1, -304($fp)
+lw $t2, -308($fp)
+add $t0, $t1, $t2
+sw $t0, -304($fp)
+lw $t0, -312($fp)
+li $t1, 3
+move $t0, $t1
+sw $t0, -312($fp)
+lw $t0, -304($fp)
+lw $t1, -312($fp)
+sw $t1, 0($t0)
+lw $t1, -304($fp)
+lw $t0, 0($t1)
+sw $t0, -316($fp)
+lw $t0, -320($fp)
+addu $t1, $fp, -120
+move $t0, $t1
+sw $t0, -320($fp)
+li $t1, 4
+li $t2, 2
+mul $t0, $t1, $t2
+sw $t0, -324($fp)
+lw $t1, -320($fp)
+lw $t2, -324($fp)
+add $t0, $t1, $t2
+sw $t0, -320($fp)
+lw $t0, -328($fp)
+li $t1, 5
+move $t0, $t1
+sw $t0, -328($fp)
+lw $t0, -320($fp)
+lw $t1, -328($fp)
+sw $t1, 0($t0)
+lw $t1, -320($fp)
+lw $t0, 0($t1)
+sw $t0, -332($fp)
+lw $t0, -336($fp)
+addu $t1, $fp, -120
+move $t0, $t1
+sw $t0, -336($fp)
+li $t1, 4
+li $t2, 3
+mul $t0, $t1, $t2
+sw $t0, -340($fp)
+lw $t1, -336($fp)
+lw $t2, -340($fp)
+add $t0, $t1, $t2
+sw $t0, -336($fp)
+lw $t0, -344($fp)
+li $t1, 4
+move $t0, $t1
+sw $t0, -344($fp)
+lw $t0, -336($fp)
+lw $t1, -344($fp)
+sw $t1, 0($t0)
+lw $t1, -336($fp)
+lw $t0, 0($t1)
+sw $t0, -348($fp)
+lw $t0, -352($fp)
+addu $t1, $fp, -120
+move $t0, $t1
+sw $t0, -352($fp)
+li $t1, 4
+li $t2, 4
+mul $t0, $t1, $t2
+sw $t0, -356($fp)
+lw $t1, -352($fp)
+lw $t2, -356($fp)
+add $t0, $t1, $t2
+sw $t0, -352($fp)
+lw $t0, -360($fp)
+li $t1, 6
+move $t0, $t1
+sw $t0, -360($fp)
+lw $t0, -352($fp)
+lw $t1, -360($fp)
+sw $t1, 0($t0)
+lw $t1, -352($fp)
+lw $t0, 0($t1)
+sw $t0, -364($fp)
+lw $t0, -368($fp)
+lw $t1, -200($fp)
+move $t0, $t1
+sw $t0, -368($fp)
+lw $t0, -372($fp)
+addu $t1, $fp, -60
+move $t0, $t1
+sw $t0, -372($fp)
+lw $t0, -376($fp)
+addu $t1, $fp, -120
+move $t0, $t1
+sw $t0, -376($fp)
+lw $t0, -380($fp)
+addu $t1, $fp, -180
+move $t0, $t1
+sw $t0, -380($fp)
+lw $t0, -384($fp)
+lw $t1, -188($fp)
+move $t0, $t1
+sw $t0, -384($fp)
+lw $t0, -384($fp)
+addu $sp, $sp, -4
+sw $t0, 0($sp)
+lw $t0, -380($fp)
+addu $sp, $sp, -4
+sw $t0, 0($sp)
+lw $t0, -376($fp)
+addu $sp, $sp, -4
+sw $t0, 0($sp)
+lw $t0, -372($fp)
+addu $sp, $sp, -4
+sw $t0, 0($sp)
+lw $t0, -368($fp)
+addu $sp, $sp, -4
+sw $t0, 0($sp)
+addu $sp, $sp, -8
+sw $fp, 0($sp)
+sw $ra, 4($sp)
+jal fknapsack
+move $sp, $fp
+lw $ra, 4($sp)
+lw $fp, 0($sp)
+addu $sp, $sp, 28
+move $t0, $v0
+sw $t0, -388($fp)
+lw $t0, -392($fp)
+lw $t1, -388($fp)
+move $t0, $t1
+sw $t0, -392($fp)
+lw $t0, -396($fp)
+lw $t1, -392($fp)
+move $t0, $t1
+sw $t0, -396($fp)
+lw $t0, -400($fp)
+lw $t1, -392($fp)
+move $t0, $t1
+sw $t0, -400($fp)
+lw $t0, -400($fp)
+move $a0, $t0
+addu $sp, $sp, -4
+sw $ra, 0($sp)
+jal f0
+lw $ra, 0($sp)
+addu $sp, $sp, 4
+lw $t0, -404($fp)
+li $t1, 0
+move $t0, $t1
+sw $t0, -404($fp)
+lw $t0, -404($fp)
+move $v0, $t0
+jr $ra

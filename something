@@ -1,0 +1,282 @@
+.data
+_prompt: .asciiz "Enter an integer:"
+_ret: .asciiz "\n"
+.globl main
+.text
+_read:
+li $v0, 4
+la $a0, _prompt
+syscall
+li $v0, 5
+syscall
+jr $ra
+_write:
+li $v0, 1
+syscall
+li $v0, 4
+la $a0, _ret
+syscall
+move $v0, $0
+jr $ra
+_max:
+addu $sp, $sp, -16
+sw $ra, 12($sp)
+sw $fp, 8($sp)
+addu $fp, $sp, 8
+sw $a0, -4($fp)
+sw $a1, -8($fp)
+blt $a0, $a1, .L1
+lw $v0, -4($fp)
+addu $sp, $fp, 8
+lw $ra, 4($fp)
+lw $fp, 0($fp)
+jr $ra
+.L1:
+lw $v0, -8($fp)
+addu $sp, $fp, 8
+lw $ra, 4($fp)
+lw $fp, 0($fp)
+jr $ra
+_knapsack:
+addu $sp, $sp, -160068
+sw $ra, 160064($sp)
+sw $fp, 160060($sp)
+addu $fp, $sp, 160060
+sw $s0, 0($sp)
+sw $s1, 4($sp)
+sw $s2, 8($sp)
+sw $s3, 12($sp)
+sw $s4, 16($sp)
+addu $s0, $fp, -160000
+li $s1, 0
+sw $a0, -160004($fp)
+sw $a1, -160008($fp)
+sw $a2, -160012($fp)
+sw $a3, -160016($fp)
+sw $s0, -160020($fp)
+sw $s1, -160024($fp)
+blt $a0, 0, .L4
+.L3:
+lw $s0, -160024($fp)
+mul $a0, $s0, 800
+lw $s1, -160020($fp)
+addu $a0, $s1, $a0
+sw $zero, 0($a0)
+addu $s0, $s0, 1
+lw $s2, -160004($fp)
+sw $s0, -160024($fp)
+ble $s0, $s2, .L3
+.L4:
+li $s0, 0
+lw $s1, 8($fp)
+sw $s0, -160028($fp)
+blt $s1, 0, .L6
+.L5:
+lw $s0, -160028($fp)
+mul $a0, $s0, 4
+lw $s1, -160020($fp)
+addu $a0, $s1, $a0
+sw $zero, 0($a0)
+addu $s0, $s0, 1
+lw $s2, 8($fp)
+sw $s0, -160028($fp)
+ble $s0, $s2, .L5
+.L6:
+li $s0, 1
+lw $s1, -160004($fp)
+sw $s0, -160024($fp)
+blt $s1, 1, .L8
+.L7:
+li $s0, 1
+lw $s1, 8($fp)
+sw $s0, -160028($fp)
+blt $s1, 1, .L10
+.L9:
+lw $s0, -160024($fp)
+addu $a0, $s0, -1
+mul $a1, $a0, 4
+lw $s1, -160008($fp)
+addu $a2, $s1, $a1
+lw $a3, 0($a2)
+lw $s2, -160028($fp)
+sw $a0, -160032($fp)
+sw $a1, -160036($fp)
+sw $a2, -160040($fp)
+bge $s2, $a3, .L12
+lw $s0, -160024($fp)
+mul $a0, $s0, 800
+lw $s1, -160020($fp)
+addu $a0, $s1, $a0
+lw $s2, -160028($fp)
+mul $a1, $s2, 4
+addu $a0, $a0, $a1
+lw $a2, -160032($fp)
+mul $a2, $a2, 800
+addu $a2, $s1, $a2
+addu $a1, $a2, $a1
+lw $a1, 0($a1)
+sw $a1, 0($a0)
+j .L13
+.L12:
+lw $s0, -160024($fp)
+mul $a0, $s0, 800
+lw $s1, -160020($fp)
+addu $a0, $s1, $a0
+lw $s2, -160028($fp)
+mul $a1, $s2, 4
+addu $s3, $a0, $a1
+lw $a0, -160032($fp)
+mul $a0, $a0, 800
+addu $a0, $s1, $a0
+lw $a2, -160040($fp)
+lw $a2, 0($a2)
+subu $a2, $s2, $a2
+mul $a2, $a2, 4
+addu $a2, $a0, $a2
+lw $a2, 0($a2)
+lw $s4, -160012($fp)
+lw $a3, -160036($fp)
+addu $a3, $s4, $a3
+lw $a3, 0($a3)
+addu $a2, $a2, $a3
+addu $a0, $a0, $a1
+lw $a0, 0($a0)
+move $a1, $a2
+jal _max
+sw $v0, 0($s3)
+.L13:
+lw $s0, -160028($fp)
+addu $s0, $s0, 1
+lw $s1, 8($fp)
+sw $s0, -160028($fp)
+ble $s0, $s1, .L9
+.L10:
+lw $s0, -160024($fp)
+addu $s0, $s0, 1
+lw $s1, -160004($fp)
+sw $s0, -160024($fp)
+ble $s0, $s1, .L7
+.L8:
+lw $s0, 8($fp)
+move $s1, $s0
+lw $s2, -160004($fp)
+move $s3, $s2
+sw $s1, -160028($fp)
+sw $s3, -160024($fp)
+blt $s3, 1, .L15
+.L14:
+lw $s0, -160024($fp)
+mul $a0, $s0, 800
+lw $s1, -160020($fp)
+addu $a0, $s1, $a0
+lw $s2, -160028($fp)
+mul $a1, $s2, 4
+addu $a0, $a0, $a1
+lw $a0, 0($a0)
+addu $a2, $s0, -1
+mul $a3, $a2, 800
+addu $a3, $s1, $a3
+addu $a1, $a3, $a1
+lw $a1, 0($a1)
+sw $a2, -160032($fp)
+ble $a0, $a1, .L17
+lw $s0, -160024($fp)
+mul $a0, $s0, 4
+lw $s0, -160016($fp)
+addu $a0, $s0, $a0
+li $v1, 1
+sw $v1, 0($a0)
+lw $a0, -160032($fp)
+mul $a1, $a0, 4
+lw $s1, -160008($fp)
+addu $a1, $s1, $a1
+lw $a1, 0($a1)
+lw $s2, -160028($fp)
+subu $s2, $s2, $a1
+sw $s2, -160028($fp)
+j .L18
+.L17:
+lw $s0, -160024($fp)
+mul $a0, $s0, 4
+lw $s0, -160016($fp)
+addu $a0, $s0, $a0
+sw $zero, 0($a0)
+.L18:
+lw $a0, -160032($fp)
+move $s0, $a0
+sw $s0, -160024($fp)
+bge $s0, 1, .L14
+.L15:
+lw $s0, -160004($fp)
+mul $a0, $s0, 800
+lw $s0, -160020($fp)
+addu $a0, $s0, $a0
+lw $s0, 8($fp)
+mul $a1, $s0, 4
+addu $a0, $a0, $a1
+lw $a0, 0($a0)
+move $v0, $a0
+lw $s0, 0($sp)
+lw $s1, 4($sp)
+lw $s2, 8($sp)
+lw $s3, 12($sp)
+lw $s4, 16($sp)
+addu $sp, $fp, 8
+lw $ra, 4($fp)
+lw $fp, 0($fp)
+jr $ra
+main:
+addu $sp, $sp, -200
+sw $ra, 196($sp)
+sw $fp, 192($sp)
+addu $fp, $sp, 192
+addu $a0, $fp, -60
+addu $a1, $fp, -120
+addu $a2, $fp, -180
+li $v1, 2
+sw $v1, 0($a0)
+addu $a3, $a0, 4
+li $v1, 2
+sw $v1, 0($a3)
+addu $a3, $a0, 8
+li $v1, 6
+sw $v1, 0($a3)
+addu $a3, $a0, 12
+li $v1, 5
+sw $v1, 0($a3)
+addu $a3, $a0, 16
+li $v1, 4
+sw $v1, 0($a3)
+li $v1, 6
+sw $v1, 0($a1)
+addu $a3, $a1, 4
+li $v1, 3
+sw $v1, 0($a3)
+addu $a3, $a1, 8
+li $v1, 5
+sw $v1, 0($a3)
+addu $a3, $a1, 12
+li $v1, 4
+sw $v1, 0($a3)
+addu $a3, $a1, 16
+li $v1, 6
+sw $v1, 0($a3)
+addu $sp, $sp, -4
+sw $a0, -184($fp)
+li $a0, 5
+sw $a1, -188($fp)
+lw $a1, -184($fp)
+sw $a2, -192($fp)
+lw $a2, -188($fp)
+lw $a3, -192($fp)
+li $v1, 10
+sw $v1, 0($sp)
+jal _knapsack
+addu $sp, $sp, 4
+move $a0, $v0
+jal _write
+li $v0, 0
+addu $sp, $fp, 8
+lw $ra, 4($fp)
+lw $fp, 0($fp)
+jr $ra
