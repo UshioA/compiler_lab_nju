@@ -28,9 +28,14 @@ void cfg_dump(FILE *f, cfg *g) {
     return;
   for (int i = 0; i < g->node->length; ++i) {
     BB *node = arr_get(i, g->node);
+    fprintf(f, "\n\033[32m");
     bb_dump(f, node);
+    fprintf(f, "\033[0m");
+    fprintf(f, "  ->\033[32m");
     adj_dump(f, get_successor(g, node));
+    fprintf(f, "  \033[0m<-\033[32m");
     adj_dump(f, get_predecessor(g, node));
+    fprintf(f, "\033[0m\n");
   }
 }
 
@@ -174,7 +179,7 @@ void build_cfg(array *nodelist_list) {
   // reserved for READ and WRITE, no cfg so mark NULL
   cfg_list->elem[0] = cfg_list->elem[1] = NULL;
   for (int i = 0; i < nodelist_list->length; ++i) {
-    if (!(uint64_t)arr_get(i+2, reachable))
+    if (!(uint64_t)arr_get(i + 2, reachable))
       continue;
     array *nl = arr_get(i, nodelist_list);
     cfg *g = arr_get(i + 2, cfg_list);

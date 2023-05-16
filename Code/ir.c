@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int tempcnt;
+int tempcnt;
 static int labelcnt;
 intercode *ircode;
 array *ir_list;

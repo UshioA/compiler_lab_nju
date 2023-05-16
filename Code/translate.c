@@ -37,9 +37,9 @@ void emit_code(intercode *ir) { ir_pushback(ir); }
 
 void dump_code() {
   for (int i = 0; i < ir_list->length; ++i) {
-    // #ifdef __DEBUG_IR_LINENO__
-    //     fprintf(stdout, "\033[32m[%d]: \033[0m", i);
-    // #endif
+#ifdef __DEBUG_IR_LINENO__
+    fprintf(stdout, "\033[32m[%d]: \033[0m", i);
+#endif
     ir_dump(ir_list->elem[i], f);
   }
 }
@@ -618,9 +618,12 @@ void translate_stmtlist(ast_node *root) {
   translate_stmtlist(stmtl);
 }
 
+extern int tempcnt;
+
 void translate_stmt(ast_node *root) {
   if (!root)
     return;
+  int back = tempcnt;
   ast_node *head = get_child_n(root, 0);
   switch (head->symbol) {
   case Exp: {
@@ -672,4 +675,5 @@ void translate_stmt(ast_node *root) {
     assert(0);
   } break;
   }
+  tempcnt = back;
 }

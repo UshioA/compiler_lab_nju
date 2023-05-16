@@ -33,10 +33,13 @@ int main(int argc, char **argv) {
           ff = stdout;
         else
           ff = fopen(argv[2], "w");
-        init_file(stdout);
-        dump_code();
+        // init_file(stdout);
+        // dump_code();
         init_codefile(ff);
         gencode();
+        // for (int i = 0; i < cfg_list->length; ++i) {
+        //   cfg_dump(stdout, arr_get(i, cfg_list));
+        // }
       }
     }
   }

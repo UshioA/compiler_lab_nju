@@ -37,13 +37,13 @@ syntax-c: $(YFILE)
 # 定义的一些伪目标
 .PHONY: clean test pack produce clean-pack
 test:
-	./parser ../Test/test1.cmm
+	./run.sh
 clean:
 	rm -f parser lex.yy.c syntax.tab.c syntax.tab.h syntax.output
 	rm -f $(OBJS) $(OBJS:.o=.d)
 	rm -f $(LFC) $(YFC) $(YFC:.c=.h)
 	rm -f *~
-	rm -f ../compile_commands.json
+	rm -f ../compile_commands.json compile_commands.json
 
 clean-all: clean
 	rm -f ../parser
