@@ -154,25 +154,30 @@ array *make_node_list(int beg, int end) {
     int at = (int)((uint64_t)arr_get(i, leader));
     int ed = i < leader->length - 1 ? ((int)(uint64_t)(arr_get(i + 1, leader)))
                                     : end;
-    if (at != ed)
-      arr_push(nodelist, new_bb_node(++nodeid, at, ed));
+    if (at != ed) {
+      BB *n = new_bb_node(++nodeid, at, ed);
+      arr_push(nodelist, n);
+      intercode *label = arr_get(at, ir_list);
+      if (label && label->kind == IR_LABEL)
+        label->label.label->corres_BB = n;
+    }
   }
   arr_push(nodelist, new_bb_exit(++nodeid));
   return nodelist;
 }
 
 static BB *find_head(array *nodelist, int labelno) {
-  for (int i = 0; i < nodelist->length; ++i) {
-    BB *bb = (BB *)arr_get(i, nodelist);
-    if (bb->kind != BB_NODE)
-      continue;
-    intercode *label = arr_get(bb->beg, ir_list);
-    if (label->kind != IR_LABEL)
-      continue;
-    if (label->label.label->tempno == labelno)
-      return bb;
-  }
-  return NULL;
+  // for (int i = 0; i < nodelist->length; ++i) {
+  //   BB *bb = (BB *)arr_get(i, nodelist);
+  //   if (bb->kind != BB_NODE)
+  //     continue;
+  //   intercode *label = arr_get(bb->beg, ir_list);
+  //   if (label->kind != IR_LABEL)
+  //     continue;
+  //   if (label->label.label->tempno == labelno)
+  //     return bb;
+  // }
+  // return NULL;
 }
 
 void build_cfg(array *nodelist_list) {
@@ -200,7 +205,8 @@ void build_cfg(array *nodelist_list) {
         case IR_IF_GOTO:
         case IR_GOTO: {
           operand *to = tail->kind == IR_GOTO ? tail->go.to : tail->ifgo.to;
-          BB *target = find_head(nl, to->tempno);
+          BB *target = to->corres_BB;
+          // BB *target = find_head(nl, to->tempno);
           assert(target);
           add_edge(g, node, target);
           add_edge(g, node, next);

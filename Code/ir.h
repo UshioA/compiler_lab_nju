@@ -22,7 +22,7 @@ typedef struct {
 
   int deref;
   int ref;
-
+  BB *corres_BB;
   int addr;
   int array;
   cmm_type *arr;
