@@ -7,7 +7,8 @@
 #include <string.h>
 
 int tempcnt;
-static int labelcnt;
+int maxtempcnt;
+int labelcnt;
 intercode *ircode;
 array *ir_list;
 
@@ -29,7 +30,9 @@ static intercode *new_ir() {
   return ir;
 }
 
-operand *new_tempvar() { return new_v(OPR_TMP, tempcnt++, NULL, 0); }
+operand *new_tempvar() {
+  return new_v(OPR_TMP, ({ maxtempcnt++, tempcnt++; }), NULL, 0);
+}
 operand *new_label() { return new_v(OPR_LABEL, labelcnt++, NULL, 0); }
 operand *new_imm(int imm) { return new_v(OPR_IMM, imm, NULL, 0); }
 operand *new_var(char *varname, int no) {

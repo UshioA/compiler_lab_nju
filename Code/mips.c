@@ -1,6 +1,7 @@
 #include "mips.h"
 #include "array.h"
 #include "basic_blk.h"
+#include "bitset.h"
 #include "cfg.h"
 #include "ir.h"
 #include "list.h"
@@ -10,6 +11,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 var_desc curr_varlist;
+
+static bitset *vars;
+extern int varno, funcno, maxtempcnt;
 int local_offset;
 int argnum;
 int paramnum;
@@ -138,15 +142,31 @@ void init_env() {
   init_regs();
   init_cfg_list();
   build_cfg(make_node_lists(make_func_blk()));
+  vars = new_bitset(varno + maxtempcnt + 1);
   fprintf(code, start);
 }
 
-static void insert_var(var_desc *v) { list_add(&v->link, &curr_varlist.link); }
+static void insert_var(var_desc *v) {
+  list_add(&v->link, &curr_varlist.link);
+  operand *op = v->op;
+  if (op->kind == OPR_TMP) {
+    bitset_insert(vars, op->tempno + varno);
+  } else {
+    bitset_insert(vars, op->varno);
+  }
+}
 
 static var_desc *findv(operand *op) {
   assert(op);
   if (op->kind == OPR_IMM || op->kind == OPR_SIZE)
     return NULL;
+  if (op->kind == OPR_TMP) {
+    if (!bitset_contain(vars, op->tempno + varno))
+      return NULL;
+  } else {
+    if (!bitset_contain(vars, op->varno))
+      return NULL;
+  }
   list_entry *pos;
   list_for_each(pos, &curr_varlist.link) {
     var_desc *cur = le2(var_desc, pos, link);

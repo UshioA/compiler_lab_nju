@@ -1,0 +1,45 @@
+FUNCTION main :
+READ t1
+va := t1
+t0 := va
+READ t3
+vb := t3
+t2 := vb
+READ t5
+vc := t5
+t4 := vc
+t10 := vb
+t11 := vb
+t8 := t10 * t11
+t14 := #4
+t15 := va
+t12 := t14 * t15
+t13 := vc
+t9 := t12 * t13
+t7 := t8 - t9
+vresult := t7
+t6 := vresult
+t16 := vresult
+t17 := #0
+IF t16 > t17 GOTO l0
+GOTO l1
+LABEL l0 :
+t19 := #2
+WRITE t19
+GOTO l2
+LABEL l1 :
+t20 := vresult
+t21 := #0
+IF t20 == t21 GOTO l3
+GOTO l4
+LABEL l3 :
+t23 := #1
+WRITE t23
+GOTO l5
+LABEL l4 :
+t25 := #0
+WRITE t25
+LABEL l5 :
+LABEL l2 :
+t26 := #0
+RETURN t26
