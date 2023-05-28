@@ -87,9 +87,9 @@ array *make_func_blk() {
     intercode *ir = ir_list->elem[i];
     if (ir->kind == IR_FUNCTION) {
       arr_push(func_head_list, (void *)((uint64_t)i));
-      if (!strcmp(ir->func.func->funcname, "main")) {
-        arr_set(ir->func.func->funcno, (void *)1, reachable);
-      }
+      // if (!strcmp(ir->func.func->funcname, "main")) {
+      //   arr_set(ir->func.func->funcno, (void *)1, reachable);
+      // }
     }
   }
   arr_push(func_head_list, (void *)(uint64_t)ir_list->length);
@@ -166,26 +166,12 @@ array *make_node_list(int beg, int end) {
   return nodelist;
 }
 
-static BB *find_head(array *nodelist, int labelno) {
-  // for (int i = 0; i < nodelist->length; ++i) {
-  //   BB *bb = (BB *)arr_get(i, nodelist);
-  //   if (bb->kind != BB_NODE)
-  //     continue;
-  //   intercode *label = arr_get(bb->beg, ir_list);
-  //   if (label->kind != IR_LABEL)
-  //     continue;
-  //   if (label->label.label->tempno == labelno)
-  //     return bb;
-  // }
-  // return NULL;
-}
-
 void build_cfg(array *nodelist_list) {
   // reserved for READ and WRITE, no cfg so mark NULL
   cfg_list->elem[0] = cfg_list->elem[1] = NULL;
   for (int i = 0; i < nodelist_list->length; ++i) {
-    if (!(uint64_t)arr_get(i + 2, reachable))
-      continue;
+    // if (!(uint64_t)arr_get(i + 2, reachable))
+    //   continue;
     array *nl = arr_get(i, nodelist_list);
     cfg *g = arr_get(i + 2, cfg_list);
     init_nodelist(g, nl);
