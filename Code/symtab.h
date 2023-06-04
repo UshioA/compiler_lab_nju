@@ -54,9 +54,6 @@ typedef struct symtab {
   uint32_t hsize;
 } symtab;
 
-static symbol *_make_symbol(cmm_type *ctype, char *name, int ival, float fval,
-                            uint32_t *dimension, int ftype);
-
 symbol *make_symbol(char *name, cmm_type *ctype);
 symbol *make_isymbol(char *name, uint32_t ival);
 symbol *make_fsymbol(char *name, float fval);

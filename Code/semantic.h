@@ -56,48 +56,26 @@ static inline void exit_scope() {
 
 void do_semantic(ast_node *root);
 
-static void program(ast_node *root);
-
-static void extdeflist(ast_node *root);
-
-static void extdef(ast_node *root);
-
-static cmm_type *specifier(ast_node *root, cmm_type *_struct);
-
-static void extdeclist(ast_node *root, cmm_type *spec);
-
-static cmm_type *fundec(ast_node *root, cmm_type *rtype);
-
-static void compst(ast_node *root, cmm_type *rtype);
-
-static cmm_type *structspecifier(ast_node *root, cmm_type *_struct);
-
-static char *opttag(ast_node *root);
-
-static cmm_type *deflist(ast_node *root, int isfield, cmm_type *_struct);
-
-static cmm_type *def(ast_node *root, int isfield, cmm_type *_struct);
-
-static cmm_type *declist(ast_node *root, cmm_type *spec, int isfield,
-                         cmm_type *_struct);
-
-static void dec(ast_node *root, cmm_type *spec, int isfield, cmm_type *_struct);
-
-static void varlist(ast_node *root, cmm_type *_v);
-
-static symbol *vardec(ast_node *root, cmm_type *type, int isfield,
-                      cmm_type *_struct);
-
-static cmm_type *expr(ast_node *root);
-
-static void paramdec(ast_node *root, cmm_type *_v);
-
-static cmm_type *args(ast_node *root, cmm_type *functype);
-
-static void stmtlist(ast_node *, cmm_type *);
-
-static cmm_type *args_ass(ast_node *root, cmm_type *paramtypes);
-
-static void stmt(ast_node *, cmm_type *);
+void program(ast_node *root);
+void extdeflist(ast_node *root);
+void extdef(ast_node *root);
+cmm_type *specifier(ast_node *root, cmm_type *_struct);
+void extdeclist(ast_node *root, cmm_type *spec);
+cmm_type *fundec(ast_node *root, cmm_type *rtype);
+void compst(ast_node *root, cmm_type *rtype);
+cmm_type *structspecifier(ast_node *root, cmm_type *_struct);
+char *opttag(ast_node *root);
+cmm_type *deflist(ast_node *root, int isfield, cmm_type *_struct);
+cmm_type *def(ast_node *root, int isfield, cmm_type *_struct);
+cmm_type *declist(ast_node *root, cmm_type *spec, int isfield, cmm_type *_struct);
+void dec(ast_node *root, cmm_type *spec, int isfield, cmm_type *_struct);
+void varlist(ast_node *root, cmm_type *_v);
+symbol *vardec(ast_node *root, cmm_type *type, int isfield,cmm_type *_struct);
+cmm_type *expr(ast_node *root);
+void paramdec(ast_node *root, cmm_type *_v);
+cmm_type *args(ast_node *root, cmm_type *functype);
+void stmtlist(ast_node *, cmm_type *);
+cmm_type *args_ass(ast_node *root, cmm_type *paramtypes);
+void stmt(ast_node *, cmm_type *);
 
 #endif

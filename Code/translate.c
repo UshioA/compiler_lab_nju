@@ -655,15 +655,17 @@ void translate_stmt(ast_node *root) {
   } break;
   case IF: {
     operand *label1 = new_label(), *label2 = new_label();
-    operand *label3;
+    operand *label3=NULL;
     if (get_child_last(root) != get_child_n(root, 4))
       label3 = new_label();
     translate_cond(get_child_n(root, 2), label1, label2,
                    get_cond(get_child_n(root, 2)));
     emit_code(new_label_ir(label1));
     translate_stmt(get_child_n(root, 4));
-    if (get_child_last(root) != get_child_n(root, 4))
+    if (get_child_last(root) != get_child_n(root, 4)){
+      assert(label3);
       emit_code(new_goto_ir(label3));
+    }
     emit_code(new_label_ir(label2));
     if (get_child_last(root) != get_child_n(root, 4)) {
       translate_stmt(get_child_last(root));

@@ -7,8 +7,6 @@ typedef struct {
   uint64_t *set;
 } bitset;
 
-static void bitset_setat(bitset *bs, uint32_t index, uint32_t value);
-
 bitset *new_bitset(uint32_t limit);
 void bitset_insert(bitset *bs, uint32_t index);
 void bitset_remove(bitset *bs, uint32_t index);

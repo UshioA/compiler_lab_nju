@@ -41,8 +41,6 @@ typedef struct cmm_type {
   int is_left;
 } cmm_type;
 
-static base_type *__new_btype(int dectype, char *struct_name);
-
 base_type *new_literal(int dectype);
 
 base_type *new_struct_type(char *struct_name);

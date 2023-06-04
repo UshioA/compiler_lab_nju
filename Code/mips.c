@@ -327,8 +327,8 @@ static void store_reg(int reg, FILE *f) {
 static void gen_ifgoto(intercode *ir) {
   assert(ir && ir->kind == IR_IF_GOTO);
   operand *rel1 = ir->ifgo.rel1, *rel2 = ir->ifgo.rel2;
-  int r1 = get_reg(ir->ifgo.rel1, 0, code);
-  int r2 = get_reg(ir->ifgo.rel2, 0, code);
+  int r1 = get_reg(rel1, 0, code);
+  int r2 = get_reg(rel2, 0, code);
   static char *__[6] = {[REL_EQ] = "beq", [REL_GE] = "bge", [REL_GT] = "bgt",
                         [REL_LE] = "ble", [REL_LT] = "blt", [REL_NEQ] = "bne"};
   assert(ir->ifgo.relop <= REL_NEQ && ir->ifgo.relop >= REL_LT);

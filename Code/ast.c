@@ -107,9 +107,6 @@ int get_symbol_type(int sy) {
   }
   }
 }
-
-void print_ast(ast_node *root) { __print_ast(root, 0); }
-
 static void __print_ast(ast_node *root, int space) {
   if (!root)
     return;
@@ -141,3 +138,4 @@ static void __print_ast(ast_node *root, int space) {
     p = p->lpeer;
   }
 }
+void print_ast(ast_node *root) { __print_ast(root, 0); }

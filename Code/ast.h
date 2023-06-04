@@ -78,5 +78,4 @@ void add_ast_child(ast_node *fa, ast_node *c);
 
 void print_ast(ast_node *root);
 
-static void __print_ast(ast_node *root, int indent);
 #endif

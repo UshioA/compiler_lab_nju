@@ -9,7 +9,7 @@
 const int writeno = 0, readno = 1;
 array *cfg_list;
 array *reachable;
-BB *_exit;
+BB *__exit;
 int blkcnt = 1;
 void adj_dump(FILE *f, array *adj) {
   if (!adj)
@@ -74,8 +74,8 @@ void init_cfg_list() {
   for (int i = 0; i < funcno; ++i) {
     arr_push(reachable, 0);
   }
-  if (!_exit)
-    _exit = new_bb_exit(-1);
+  if (!__exit)
+    __exit = new_bb_exit(-1);
   for (int i = 0; i < funcno; ++i) {
     arr_push(cfg_list, new_cfg());
   }
@@ -212,7 +212,7 @@ void build_cfg(array *nodelist_list) {
       } break;
       case BB_EXIT: {
       } break;
-      defalut : { assert(0); } break;
+      default : { assert(0); } break;
       }
     }
   }

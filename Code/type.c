@@ -92,15 +92,15 @@ void ctype_set_contain_type(cmm_type *head, cmm_type *contain) {
   head->contain_len = -1;
   cmm_compute_len(head);
 }
-static base_type *btypecpy(base_type *b) {
-  if (!b)
-    return b;
-  base_type *some = __new_btype(b->dectype, b->struct_name);
-  if (b->struct_field) {
-    some->struct_field = b->struct_field;
-  }
-  return some;
-}
+// static base_type *btypecpy(base_type *b) {
+//   if (!b)
+//     return b;
+//   base_type *some = __new_btype(b->dectype, b->struct_name);
+//   if (b->struct_field) {
+//     some->struct_field = b->struct_field;
+//   }
+//   return some;
+// }
 
 cmm_type *ctypecpy(cmm_type *t) {
   cmm_type *some =
