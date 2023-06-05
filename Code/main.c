@@ -3,6 +3,7 @@
 #include "cfg.h"
 #include "ir.h"
 #include "mips.h"
+#include "opt.h"
 #include "semantic.h"
 #include "syntax.tab.h"
 #include "translate.h"
@@ -33,13 +34,19 @@ int main(int argc, char **argv) {
       if (!semanerr) {
         init_ircode();
         translate_program(ast_root);
-        // init_file(stdout);
-        // dump_code();
-        init_codefile(ff);
-        gencode();
-        // for (int i = 0; i < cfg_list->length; ++i) {
-        //   cfg_dump(stdout, arr_get(i, cfg_list));
-        // }
+        init_cfg_list();
+        build_cfg(make_node_lists(make_func_blk()));
+        init_file(stdout);
+        dump_code();
+        // init_codefile(ff);
+        // gencode();
+        for (int i = 0; i < cfg_list->length; ++i) {
+          cfg_dump(ff, arr_get(i, cfg_list));
+        }
+        init_live();
+        for (int i = 2; i < cfg_list->length; ++i) {
+          do_live(i);
+        }
       }
     }
   }

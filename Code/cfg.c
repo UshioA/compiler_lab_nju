@@ -67,7 +67,9 @@ void add_edge(cfg *g, BB *b1, BB *b2) {
 
 array *get_predecessor(cfg *g, BB *b) { return arr_get(b->blkid, g->radj); }
 array *get_successor(cfg *g, BB *b) { return arr_get(b->blkid, g->adj); }
-
+BB* get_node(cfg* g, int id){
+  return arr_get(id, g->node);
+}
 void init_cfg_list() {
   cfg_list = new_arr(funcno);
   reachable = new_arr(funcno);

@@ -26,6 +26,6 @@ void do_live(int idx);
 
 int live_transfer_bb(BB *node, cfg *g);
 
-int live_transfer_ir(intercode *ir, int end, array *succ);
+int live_transfer_ir(intercode *ir, int at, int end);
 
 #endif

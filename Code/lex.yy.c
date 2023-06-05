@@ -1,6 +1,6 @@
-#line 2 "./lex.yy.c"
+#line 1 "./lex.yy.c"
 
-#line 4 "./lex.yy.c"
+#line 3 "./lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -630,9 +630,9 @@ int parerr=0;
   yylval = make_ast_term(n, empty);\
   return n;
 
-#line 634 "./lex.yy.c"
+#line 633 "./lex.yy.c"
 /* %define api.value.type { ast_node* } */
-#line 636 "./lex.yy.c"
+#line 635 "./lex.yy.c"
 
 #define INITIAL 0
 
@@ -851,7 +851,7 @@ YY_DECL
 	{
 #line 78 "./lexical.l"
 
-#line 855 "./lex.yy.c"
+#line 854 "./lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1104,7 +1104,7 @@ YY_RULE_SETUP
 #line 115 "./lexical.l"
 ECHO;
 	YY_BREAK
-#line 1108 "./lex.yy.c"
+#line 1107 "./lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{

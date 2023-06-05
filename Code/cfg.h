@@ -22,6 +22,7 @@ void add_edge(cfg *g, BB *b1, BB *b2);
 
 array *get_predecessor(cfg *g, BB *b);
 array *get_successor(cfg *g, BB *b);
+BB* get_node(cfg* g, int id);
 
 extern array *ir_list;
 extern array *cfg_list;
