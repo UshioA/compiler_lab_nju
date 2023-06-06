@@ -180,10 +180,10 @@ void op_dump(operand *op, FILE *f) {
     fprintf(f, "t%d", op->tempno);
   } break;
   case OPR_VAR: {
-    fprintf(f, "v%s", op->varname);
+    fprintf(f, "v%d", op->varno);
   } break;
   case OPR_LABEL: {
-    fprintf(f, "l%d", op->imm);
+    fprintf(f, "label%d", op->imm);
   } break;
   case OPR_FUNC: {
     if (!strcmp(op->funcname, "main"))

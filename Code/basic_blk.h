@@ -11,6 +11,7 @@ typedef struct BB {
   // [beg, end)
   int beg;
   int end;
+  int reachable;
 } BB;
 
 BB *new_bb(int blkid, int beg, int end, int kind);

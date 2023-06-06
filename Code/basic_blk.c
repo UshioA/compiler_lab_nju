@@ -9,6 +9,7 @@ BB *new_bb(int blkid, int beg, int end, int kind) {
   b->beg = beg;
   b->end = end;
   b->kind = kind;
+  b->reachable = 0;
   return b;
 }
 

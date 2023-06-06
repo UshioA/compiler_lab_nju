@@ -7,7 +7,7 @@
 #include "list.h"
 #include <stdio.h>
 #include <stdlib.h>
-#define __DEBUG_IR_LINENO__
+// #define __DEBUG_IR_LINENO__
 #define __CMM_INT_SIZE__ 4
 
 typedef struct {

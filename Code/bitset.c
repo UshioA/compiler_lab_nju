@@ -36,12 +36,12 @@ void bitset_remove(bitset *bs, uint32_t index) { bitset_setat(bs, index, 0); }
 uint64_t bitset_contain(bitset *bs, uint32_t index) {
   uint32_t numat = map_num(index);
   uint32_t bitat = map_bit(index);
-  return ((bs->set[numat]) & (0x1ul << bitat));
+  return !!((bs->set[numat]) & (0x1ul << bitat));
 }
 int bitset_eq(bitset *b1, bitset *b2) {
   if (b1->limit != b2->limit)
     return 0;
-  return memcmp(b1->set, b2->set, sizeof(uint64_t) * b1->setlen);
+  return !memcmp(b1->set, b2->set, sizeof(uint64_t) * b1->setlen);
 }
 bitset *bitset_clone(bitset *b) {
   bitset *bc = new_bitset(b->limit);
@@ -74,7 +74,7 @@ int bitset_intersection(bitset *b1, bitset *b2) {
   int changed = 0;
   for (int i = 0; i < b1->setlen; ++i) {
     changed |= b1->set[i] != b2->set[i];
-    b1->set[i] &= b2->set[i];
+    b1->set[i] = b1->set[i] & b2->set[i];
   }
   return changed;
 }
@@ -84,7 +84,7 @@ int bitset_union(bitset *b1, bitset *b2) {
   int changed = 0;
   for (int i = 0; i < b1->setlen; ++i) {
     changed |= b1->set[i] != b2->set[i];
-    b1->set[i] |= b1->set[i];
+    b1->set[i] = b1->set[i] | b2->set[i];
   }
   return changed;
 }

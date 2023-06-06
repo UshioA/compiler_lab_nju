@@ -28,4 +28,11 @@ int live_transfer_bb(BB *node, cfg *g);
 
 int live_transfer_ir(intercode *ir, int at, int end);
 
+int live_remove_useless();
+int live_remove_useless_cfg(int idx);
+int live_remove_useless_bb(BB *node, cfg *g);
+
+int live_merge_assign();
+int live_merge_assign_cfg(int idx);
+int live_merge_assign_bb(BB *node, cfg *g);
 #endif

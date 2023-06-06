@@ -11,6 +11,7 @@ array *cfg_list;
 array *reachable;
 BB *__exit;
 int blkcnt = 1;
+static uint64_t mainid;
 void adj_dump(FILE *f, array *adj) {
   if (!adj)
     return;
@@ -44,7 +45,7 @@ cfg *new_cfg() {
   c->adj = new_arr(DEFAULT_NODE_NUM);
   c->radj = new_arr(DEFAULT_NODE_NUM);
   c->node = new_arr(DEFAULT_NODE_NUM);
-  c->reachable = 1;
+  c->reachable = 0;
   return c;
 }
 
@@ -67,15 +68,9 @@ void add_edge(cfg *g, BB *b1, BB *b2) {
 
 array *get_predecessor(cfg *g, BB *b) { return arr_get(b->blkid, g->radj); }
 array *get_successor(cfg *g, BB *b) { return arr_get(b->blkid, g->adj); }
-BB* get_node(cfg* g, int id){
-  return arr_get(id, g->node);
-}
+BB *get_node(cfg *g, int id) { return arr_get(id, g->node); }
 void init_cfg_list() {
   cfg_list = new_arr(funcno);
-  reachable = new_arr(funcno);
-  for (int i = 0; i < funcno; ++i) {
-    arr_push(reachable, 0);
-  }
   if (!__exit)
     __exit = new_bb_exit(-1);
   for (int i = 0; i < funcno; ++i) {
@@ -89,9 +84,9 @@ array *make_func_blk() {
     intercode *ir = ir_list->elem[i];
     if (ir->kind == IR_FUNCTION) {
       arr_push(func_head_list, (void *)((uint64_t)i));
-      // if (!strcmp(ir->func.func->funcname, "main")) {
-      //   arr_set(ir->func.func->funcno, (void *)1, reachable);
-      // }
+      if (!strcmp(ir->func.func->funcname, "main")) {
+        mainid = ir->func.func->funcno;
+      }
     }
   }
   arr_push(func_head_list, (void *)(uint64_t)ir_list->length);
@@ -131,15 +126,6 @@ array *make_node_list(int beg, int end) {
         bitset_insert(bs, i + 1);
       }
     } break;
-    case IR_CALL: {
-      arr_set(ir->call.func->funcno, (void *)1, reachable);
-    } break;
-    case IR_READ: {
-      arr_set(readno, (void *)1, reachable);
-    } break;
-    case IR_WRITE: {
-      arr_set(writeno, (void *)1, reachable);
-    } break;
     default:
       break;
     }
@@ -166,6 +152,34 @@ array *make_node_list(int beg, int end) {
   }
   arr_push(nodelist, new_bb_exit(++nodeid));
   return nodelist;
+}
+
+static void mark_reachable_cfg(array *cfg_list) {
+  array *q = new_arr(funcno);
+  assert(mainid);
+  arr_push(q, (void *)mainid);
+  while (q->length) {
+    uint64_t funid = (uint64_t)q->elem[q->length - 1];
+    --q->length;
+    cfg *g = arr_get(funid, cfg_list);
+    if (g->reachable)
+      continue;
+    g->reachable = 1;
+    for (int i = 0; i < g->node->length; ++i) {
+      BB *bb = arr_get(i, g->node);
+      if (bb->reachable)
+        continue;
+      bb->reachable = 1;
+      if (bb->kind == BB_EXIT)
+        continue;
+      for (int j = bb->beg; j < bb->end; ++j) {
+        intercode *ir = arr_get(j, ir_list);
+        if (ir->kind == IR_CALL) {
+          arr_push(q, (void *)(uint64_t)(ir->func.func->funcno));
+        }
+      }
+    }
+  }
 }
 
 void build_cfg(array *nodelist_list) {
@@ -214,8 +228,11 @@ void build_cfg(array *nodelist_list) {
       } break;
       case BB_EXIT: {
       } break;
-      default : { assert(0); } break;
+      default: {
+        assert(0);
+      } break;
       }
     }
   }
+  mark_reachable_cfg(cfg_list);
 }
