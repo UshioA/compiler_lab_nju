@@ -382,10 +382,10 @@ int live_merge_assign_bb(BB *node, cfg *g) {
       changed = 1;
     } break;
     case IR_CALL: {
-
+      // TODO
     } break;
     case IR_READ: {
-
+      // TODO
     } break;
     default:
       break;

@@ -32,26 +32,11 @@ int main(int argc, char **argv) {
   else
     ff = fopen(argv[2], "w");
   init_file(ff);
-  // dump_code();
-  // yyrestart(f);
-  // if (!yyparse(ast_root)) {
-  //   if (!parerr) {
-  //     do_semantic(ast_root);
-  //     if (!semanerr) {
-  //       init_ircode();
-  //       translate_program(ast_root);
   init_cfg_list();
   build_cfg(make_node_lists(make_func_blk()));
-  // init_codefile(ff);
-  // gencode();
-  // for (int i = 0; i < cfg_list->length; ++i) {
-  //   cfg_dump(stdout, arr_get(i, cfg_list));
-  // }
   init_live();
   int thing = 0;
-  // int cnt = 0;
   do {
-    // printf("ROUND %d\n", cnt++);
     thing = 0;
     for (int i = 2; i < cfg_list->length; ++i) {
       if (cfg_list->elem[i] && ((cfg *)cfg_list->elem[i])->reachable)
@@ -63,5 +48,3 @@ int main(int argc, char **argv) {
   dump_code();
   return 0;
 }
-// }
-// }
