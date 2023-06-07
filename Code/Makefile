@@ -49,7 +49,7 @@ clean-all: clean
 	rm -f ../parser
 
 pack:produce clean
-	cd ~/Lab && zip -r 201220195.zip Code Test README parser report.pdf
+	cd .. && zip -r 201220195.zip Code Test README parser report.pdf
 
 clean-pack:
 	rm -rf ../201220195.zip
